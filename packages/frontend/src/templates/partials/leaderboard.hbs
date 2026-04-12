@@ -1,0 +1,48 @@
+<div class="border border-border rounded-lg overflow-hidden my-5">
+  <div class="px-4.5 py-3.5 bg-bg-soft border-b border-border flex justify-between items-center flex-wrap gap-2">
+    <div>
+      <h4 class="text-[14px] font-semibold">SWE-Bench-Production Leaderboard</h4>
+      <div class="text-[11px] text-muted">Higher is better · Updated April {{year}}</div>
+    </div>
+  </div>
+  <table class="w-full border-collapse text-[12px]">
+    <thead>
+      <tr>
+        <th class="bg-bg-soft px-3 py-2.5 text-left font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border w-10 text-center">
+          #</th>
+        <th class="bg-bg-soft px-3 py-2.5 text-left font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border">
+          Model</th>
+        <th class="bg-bg-soft px-3 py-2.5 text-right font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border">
+          Avg ↓</th>
+        <th class="bg-bg-soft px-3 py-2.5 text-right font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border">
+          Infra</th>
+        <th class="bg-bg-soft px-3 py-2.5 text-right font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border">
+          Billing</th>
+        <th class="bg-bg-soft px-3 py-2.5 text-right font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border">
+          AI Tools</th>
+        <th class="bg-bg-soft px-3 py-2.5 text-right font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border">
+          SaaS</th>
+        <th class="bg-bg-soft px-3 py-2.5 text-right font-semibold text-[10px] uppercase tracking-wider text-muted border-b border-border">
+          Ship</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each benchmarks}}
+      <tr class="{{#if this.isWinner}}bg-yellow-soft font-semibold{{/if}} border-b border-border last:border-b-0">
+        <td class="px-3 py-3 align-middle font-bold w-10 text-center {{#if this.isWinner}}text-yellow-rank{{else}}text-muted{{/if}}">
+          {{#if this.isWinner}}🏆 {{/if}}{{this.rank}}</td>
+        <td class="px-3 py-3 align-middle font-mono text-[11px]">{{this.name}}</td>
+        <td class="px-3 py-3 align-middle text-right font-mono font-bold">{{this.scores.avg}}</td>
+        <td class="px-3 py-3 align-middle text-right font-mono">{{this.scores.infra}}</td>
+        <td class="px-3 py-3 align-middle text-right font-mono">{{this.scores.billing}}</td>
+        <td class="px-3 py-3 align-middle text-right font-mono">{{this.scores.aiTools}}</td>
+        <td class="px-3 py-3 align-middle text-right font-mono">{{this.scores.saas}}</td>
+        <td class="px-3 py-3 align-middle text-right font-mono">{{this.scores.ship}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <div class="px-4.5 py-2.5 bg-bg-soft border-t border-border text-[11px] text-muted">
+    * Scores normalized from production metrics. SWE-Bench-Production is an internal benchmark. Results may not generalize to environments with excessive meetings.
+  </div>
+</div>

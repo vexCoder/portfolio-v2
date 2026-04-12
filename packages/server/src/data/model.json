@@ -1,0 +1,25 @@
+{
+  "modelName": "golosinda-senior-v7",
+  "tags": [
+    "fullstack",
+    "healthcare",
+    "typescript",
+    "postgres",
+    "billing-systems",
+    "ai-tooling",
+    "7-years-exp",
+    "license:contract",
+    "region:ph"
+  ],
+  "frontmatter": {
+    "license": "contract",
+    "baseModel": "self-taught",
+    "fineTunedFrom": "golosinda-mid-v6",
+    "taskCategories": [
+      "fullstack",
+      "healthcare",
+      "billing",
+      "ai-tooling"
+    ]
+  }
+}

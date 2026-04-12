@@ -1,0 +1,81 @@
+<div class="text-[13px]">
+  {{!-- Analytics Widget --}}
+  <div class="border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="px-3.5 py-2.5 bg-bg-soft border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted">
+      Analytics
+    </div>
+    {{!-- Tabs --}}
+    <div class="flex border-b border-border">
+      <button data-tab="views" class="analytics-tab flex-1 px-1 py-2 text-[10px] font-semibold uppercase tracking-wider cursor-pointer font-sans border-0 border-r border-r-border border-b-2 border-b-yellow bg-bg text-fg -mb-px transition-colors duration-150">Views</button>
+      <button data-tab="downloads" class="analytics-tab flex-1 px-1 py-2 text-[10px] font-semibold uppercase tracking-wider cursor-pointer font-sans border-0 border-r border-r-border bg-bg-soft text-muted hover:bg-bg hover:text-fg transition-colors duration-150">Downloads</button>
+      <button data-tab="stars" class="analytics-tab flex-1 px-1 py-2 text-[10px] font-semibold uppercase tracking-wider cursor-pointer font-sans border-0 bg-bg-soft text-muted hover:bg-bg hover:text-fg transition-colors duration-150">Stars</button>
+    </div>
+    <div class="px-3.5 py-3">
+      {{!-- Views panel --}}
+      <div id="analytics-views" class="analytics-panel">
+        <div class="text-[24px] font-bold mb-0.5 leading-[1.1]">{{formatNumber totals.views}}</div>
+        <div class="text-[11px] text-muted mb-2.5"><span class="{{#if (eq trends.views.direction "up")}}text-green{{else if (eq trends.views.direction "down")}}text-red{{else}}text-muted{{/if}} font-semibold">{{#if (eq trends.views.direction "up")}}↑{{else if (eq trends.views.direction "down")}}↓{{else}}—{{/if}} {{trends.views.pct}}</span> last 30 days</div>
+        <svg class="w-full h-11 block" id="graph-views" viewBox="0 0 200 44" preserveAspectRatio="none"></svg>
+      </div>
+      {{!-- Downloads panel --}}
+      <div id="analytics-downloads" class="analytics-panel hidden">
+        <div class="text-[24px] font-bold mb-0.5 leading-[1.1]">{{formatNumber totals.downloads}}</div>
+        <div class="text-[11px] text-muted mb-2.5"><span class="{{#if (eq trends.downloads.direction "up")}}text-green{{else if (eq trends.downloads.direction "down")}}text-red{{else}}text-muted{{/if}} font-semibold">{{#if (eq trends.downloads.direction "up")}}↑{{else if (eq trends.downloads.direction "down")}}↓{{else}}—{{/if}} {{trends.downloads.pct}}</span> last 30 days · resume PDF</div>
+        <svg class="w-full h-11 block" id="graph-downloads" viewBox="0 0 200 44" preserveAspectRatio="none"></svg>
+      </div>
+      {{!-- Stars panel --}}
+      <div id="analytics-stars" class="analytics-panel hidden">
+        <div class="text-[24px] font-bold mb-0.5 leading-[1.1]">{{formatNumber totals.stars}}</div>
+        <div class="text-[11px] text-muted mb-2.5"><span class="{{#if (eq trends.stars.direction "up")}}text-green{{else if (eq trends.stars.direction "down")}}text-red{{else}}text-muted{{/if}} font-semibold">{{#if (eq trends.stars.direction "up")}}↑{{else if (eq trends.stars.direction "down")}}↓{{else}}—{{/if}} {{trends.stars.pct}}</span> last 30 days</div>
+        <svg class="w-full h-11 block" id="graph-stars" viewBox="0 0 200 44" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+  </div>
+
+  {{!-- Model Info --}}
+  <div class="border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="px-3.5 py-2.5 bg-bg-soft border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted">
+      Model Info
+    </div>
+    <div class="px-3.5 py-3">
+      <div class="flex justify-between py-1 text-[12px]"><span class="text-muted">Library</span><span class="text-fg font-medium">typescript</span></div>
+      <div class="flex justify-between py-1 text-[12px]"><span class="text-muted">License</span><span class="text-fg font-medium">{{model.frontmatter.license}}</span></div>
+      <div class="flex justify-between py-1 text-[12px]"><span class="text-muted">Base</span><span class="text-fg font-medium">{{model.frontmatter.baseModel}}</span></div>
+      <div class="flex justify-between py-1 text-[12px]"><span class="text-muted">Lang</span><span class="text-fg font-medium">{{#each site.languages}}{{#if @index}}, {{/if}}{{this}}{{/each}}</span></div>
+      <div class="flex justify-between py-1 text-[12px]"><span class="text-muted">Region</span><span class="text-fg font-medium">{{site.region}}</span></div>
+    </div>
+  </div>
+
+  {{!-- Spaces using this model --}}
+  <div class="border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="px-3.5 py-2.5 bg-bg-soft border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted">
+      Spaces using this model
+    </div>
+    <div class="px-3.5 py-3 text-[12px] leading-[1.9]">
+      {{#each projects}}
+      {{#if this.url}}
+      {{this.emoji}} <a href="{{this.url}}" target="_blank" rel="noopener noreferrer">{{this.title}}</a><br>
+      {{else if this.repo}}
+      {{this.emoji}} <a href="{{this.repo}}" target="_blank" rel="noopener noreferrer">{{this.title}}</a><br>
+      {{else}}
+      {{this.emoji}} {{this.title}}<br>
+      {{/if}}
+      {{/each}}
+    </div>
+  </div>
+
+  {{!-- Collections --}}
+  <div class="border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="px-3.5 py-2.5 bg-bg-soft border-b border-border text-[11px] font-semibold uppercase tracking-wider text-muted">
+      Collections including this model
+    </div>
+    <div class="px-3.5 py-3 text-[12px] leading-[1.8] text-muted">
+      <div>📂 Senior Engineers {{year}}</div>
+      <div>📂 Healthcare Infrastructure</div>
+      <div>📂 Available for Contract</div>
+    </div>
+  </div>
+</div>
+
+{{!-- Analytics data for JS graph rendering --}}
+<script id="analytics-data" type="application/json">{{{json analytics}}}</script>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css">
+  <link rel="stylesheet" href="/css/output.css">
+  {{> og}}
+  <script>
+    (function() {
+      var theme = localStorage.getItem("theme");
+      if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
+</head>
+<body class="bg-bg text-fg font-sans text-[15px] leading-[1.6]">
+  {{> header}}
+  {{{body}}}
+  {{> footer}}
+  <script>
+    // --- Theme Toggle ---
+    (function() {
+      var toggle = document.getElementById("theme-toggle");
+      if (!toggle) return;
+      toggle.addEventListener("click", function() {
+        var isDark = document.documentElement.classList.toggle("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
+    })();
+
+    // --- Star Button ---
+    document.getElementById("star-btn")?.addEventListener("click", async function () {
+      try {
+        var res = await fetch("/api/star", { method: "POST" });
+        var data = await res.json();
+        var btn = document.getElementById("star-btn");
+        document.querySelectorAll("[data-stars]").forEach(function (el) {
+          el.textContent = data.stars.toLocaleString();
+        });
+        var icon = btn.querySelector("i");
+        if (data.starred) {
+          btn.classList.remove("bg-bg", "text-fg", "hover:bg-bg-soft");
+          btn.classList.add("bg-yellow-soft", "text-yellow-text", "border-yellow");
+          icon.className = "ph-fill ph-star";
+          btn.childNodes.forEach(function(n) { if (n.nodeType === 3 && n.textContent.trim() === "Star") n.textContent = " Starred "; });
+        } else {
+          btn.classList.remove("bg-yellow-soft", "text-yellow-text", "border-yellow");
+          btn.classList.add("bg-bg", "text-fg", "hover:bg-bg-soft");
+          icon.className = "ph ph-star";
+          btn.childNodes.forEach(function(n) { if (n.nodeType === 3 && n.textContent.trim() === "Starred") n.textContent = " Star "; });
+        }
+      } catch (e) {
+        console.error("Star failed:", e);
+      }
+    });
+
+    // --- Copy Model Path ---
+    document.getElementById("copy-btn")?.addEventListener("click", function () {
+      var text = "{{site.username}}/{{model.modelName}}";
+      navigator.clipboard.writeText(text).then(function () {
+        var btn = document.getElementById("copy-btn");
+        btn.style.color = "var(--color-green)";
+        setTimeout(function () { btn.style.color = ""; }, 1500);
+      });
+    });
+
+    // --- Analytics Tabs + Graph ---
+    (function() {
+      var dataEl = document.getElementById("analytics-data");
+      if (!dataEl) return;
+      var analytics = JSON.parse(dataEl.textContent);
+
+      var colors = { views: "--color-blue", downloads: "--color-green", stars: "--color-yellow-rank" };
+      var fills  = { views: "--color-blue", downloads: "--color-green", stars: "--color-yellow" };
+
+      function renderGraph(svgId, key) {
+        var svg = document.getElementById(svgId);
+        if (!svg) return;
+        var values = analytics.map(function(d) { return d.stats[key]; });
+        var max = Math.max.apply(null, values) || 1;
+        var points = values.map(function(v, i) {
+          var x = (i / (values.length - 1 || 1)) * 200;
+          var y = 40 - (v / max) * 36 - 2;
+          return x + "," + y;
+        }).join(" ");
+        var strokeColor = "var(" + colors[key] + ")";
+        var fillColor = "var(" + fills[key] + ")";
+
+        svg.innerHTML =
+          '<polyline points="' + points + '" fill="none" stroke="' + strokeColor + '" stroke-width="2"/>' +
+          '<polyline points="' + points + ' 200,44 0,44" fill="' + fillColor + '" opacity="0.1"/>';
+      }
+
+      renderGraph("graph-views", "views");
+      renderGraph("graph-stars", "stars");
+      renderGraph("graph-downloads", "downloads");
+
+      // Tab switching
+      var tabs = document.querySelectorAll(".analytics-tab");
+      var panels = document.querySelectorAll(".analytics-panel");
+      tabs.forEach(function(tab) {
+        tab.addEventListener("click", function() {
+          var target = tab.getAttribute("data-tab");
+          tabs.forEach(function(t) {
+            t.classList.remove("border-b-2", "border-b-yellow", "bg-bg", "text-fg", "-mb-px");
+            t.classList.add("bg-bg-soft", "text-muted");
+          });
+          tab.classList.remove("bg-bg-soft", "text-muted");
+          tab.classList.add("border-b-2", "border-b-yellow", "bg-bg", "text-fg", "-mb-px");
+          panels.forEach(function(p) { p.classList.add("hidden"); });
+          var activePanel = document.getElementById("analytics-" + target);
+          if (activePanel) activePanel.classList.remove("hidden");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

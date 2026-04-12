@@ -1,0 +1,46 @@
+<div class="px-8 pt-6 pb-4 border-b border-border bg-bg-soft">
+  {{!-- Path --}}
+  <div class="text-[20px] font-medium mb-3 flex items-center gap-2 flex-wrap">
+    <span class="text-muted">{{site.username}}</span>
+    <span class="text-muted">/</span>
+    <span class="font-bold text-fg">{{model.modelName}}</span>
+    <button id="copy-btn" class="text-muted cursor-pointer text-[14px] bg-transparent border-none p-0" title="Copy model path">
+      <i class="ph ph-copy"></i>
+    </button>
+    <span class="text-[10px] border border-border-strong px-2 py-0.5 rounded-full text-muted font-medium inline-flex items-center gap-1">
+      <i class="ph ph-lock-simple text-[12px]"></i> Public
+    </span>
+  </div>
+
+  {{!-- Action buttons --}}
+  <div class="flex gap-2 flex-wrap mb-4">
+    <button id="star-btn" class="border border-border-strong px-3.5 py-1.5 text-[13px] font-medium rounded-md cursor-pointer font-sans inline-flex items-center gap-1.5 {{#if starred}}bg-yellow-soft text-yellow-text border-yellow{{else}}bg-bg text-fg hover:bg-bg-soft{{/if}}">
+      <i class="ph{{#if starred}}-fill{{/if}} ph-star"></i> {{#if starred}}Starred{{else}}Star{{/if}} <span class="text-muted font-normal ml-1" data-stars>{{formatNumber totals.stars}}</span>
+    </button>
+    <a href="mailto:{{site.email}}?subject=Inquiry%20from%20Portfolio" class="border border-border-strong bg-bg px-3.5 py-1.5 text-[13px] font-medium rounded-md cursor-pointer font-sans text-fg inline-flex items-center gap-1.5 hover:bg-bg-soft no-underline">
+      <i class="ph ph-envelope-simple"></i> Use this model
+    </a>
+    <a href="/api/download" class="bg-fg text-bg border border-fg px-3.5 py-1.5 text-[13px] font-medium rounded-md cursor-pointer font-sans inline-flex items-center gap-1.5 hover:opacity-90 no-underline">
+      <i class="ph ph-download-simple"></i> Deploy
+    </a>
+  </div>
+
+  {{!-- Chips --}}
+  <div class="flex gap-1.5 flex-wrap mb-3">
+    <span class="bg-yellow-soft border border-yellow px-2.5 py-0.5 rounded-full text-[11px] text-yellow-text font-medium">🏆 ranked #1</span>
+    {{#each model.tags}}
+    <span class="bg-bg border border-border px-2.5 py-0.5 rounded-full text-[11px] text-muted font-medium">{{this}}</span>
+    {{/each}}
+  </div>
+
+  {{!-- Stats --}}
+  <div class="text-[12px] text-muted flex items-center flex-wrap gap-y-1">
+    <span>Updated <strong>{{timeAgo lastUpdated}}</strong></span>
+    <span class="mx-2">·</span>
+    <span class="inline-flex items-center gap-1"><i class="ph ph-download-simple"></i> {{formatNumber totals.downloads}} deploys</span>
+    <span class="mx-2">·</span>
+    <span class="inline-flex items-center gap-1"><i class="ph ph-eye"></i> {{formatNumber totals.views}} views</span>
+    <span class="mx-2">·</span>
+    <span class="inline-flex items-center gap-1"><i class="ph ph-star"></i> <span data-stars>{{formatNumber totals.stars}}</span> stars</span>
+  </div>
+</div>

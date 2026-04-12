@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Frontend build output
+packages/frontend/dist/
+
+# Environment
+.env
+.env.local
+
+# Artifacts
+artifacts

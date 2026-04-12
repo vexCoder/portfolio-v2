@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "tukod-ai",
+    "title": "vexCoder/tukod-ai",
+    "description": "Node-based AI workspace — Rust/Tauri backend, React frontend, LLM streaming via OpenRouter, LanceDB vector storage, MCP tool integration.",
+    "tags": ["rust", "tauri", "react", "ai", "mcp"],
+    "emoji": "\ud83e\udde0",
+    "repo": "https://github.com/vexCoder/tukod-ai",
+    "featured": true
+  },
+  {
+    "slug": "elixir-cafe",
+    "title": "delve/elixir-cafe",
+    "description": "Narrative puzzle game — potion-brewing mechanics, dialogue system, multiple endings. Built for Pirate Software Jam 15.",
+    "tags": ["godot", "gdscript", "game-jam"],
+    "emoji": "\ud83c\udfae",
+    "url": "https://delve-murder-nevermore.itch.io/elixir-cafe",
+    "featured": true
+  }
+]

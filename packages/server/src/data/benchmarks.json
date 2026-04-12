@@ -1,0 +1,32 @@
+[
+  {
+    "rank": 1,
+    "name": "vexCoder/golosinda-senior-v7",
+    "scores": { "avg": 93.7, "infra": 94.4, "billing": 80.0, "aiTools": 100.0, "saas": 99.2, "ship": 95.5 },
+    "isWinner": true
+  },
+  {
+    "rank": 2,
+    "name": "acme/architect-no-code-v3",
+    "scores": { "avg": 51.6, "infra": 72.0, "billing": 65.0, "aiTools": 44.0, "saas": 38.0, "ship": 40.0 },
+    "isWinner": false
+  },
+  {
+    "rank": 3,
+    "name": "meta/framework-hopper-v5",
+    "scores": { "avg": 44.8, "infra": 32.0, "billing": 28.0, "aiTools": 52.0, "saas": 60.0, "ship": 52.0 },
+    "isWinner": false
+  },
+  {
+    "rank": 4,
+    "name": "openai/junior-bootcamp-grad-v2",
+    "scores": { "avg": 41.2, "infra": 18.0, "billing": 12.0, "aiTools": 55.0, "saas": 48.0, "ship": 72.0 },
+    "isWinner": false
+  },
+  {
+    "rank": 5,
+    "name": "stealth/ai-copilot-only-v1",
+    "scores": { "avg": 38.7, "infra": 8.0, "billing": 4.0, "aiTools": 88.0, "saas": 22.0, "ship": 71.5 },
+    "isWinner": false
+  }
+]

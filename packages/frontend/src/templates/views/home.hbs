@@ -1,0 +1,223 @@
+{{> repo-header}}
+
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] max-w-[1280px] mx-auto gap-8 p-8 max-md:p-5">
+
+  <div class="min-w-0">
+    {{!-- YAML Frontmatter --}}
+    <div class="bg-code-bg border border-border rounded-lg px-5 py-4 font-mono text-[12px] leading-[1.7] mb-7 overflow-x-auto">
+<span class="text-muted">---</span>
+<span class="text-purple">language</span>:
+{{#each site.languages}}
+  - <span class="text-sky">{{this}}</span>
+{{/each}}
+<span class="text-purple">license</span>: <span class="text-sky">{{model.frontmatter.license}}</span>
+<span class="text-purple">library_name</span>: <span class="text-sky">typescript</span>
+<span class="text-purple">base_model</span>: <span class="text-sky">{{model.frontmatter.baseModel}}</span>
+<span class="text-purple">finetuned_from</span>: <span class="text-sky">{{model.frontmatter.fineTunedFrom}}</span>
+<span class="text-purple">tags</span>:
+{{#each model.frontmatter.taskCategories}}
+  - <span class="text-sky">{{this}}</span>
+{{/each}}
+<span class="text-purple">datasets</span>:
+{{#each experience}}
+  - <span class="text-sky">{{this.slug}}</span>
+{{/each}}
+<span class="text-purple">model-index</span>:
+  - <span class="text-purple">name</span>: <span class="text-sky">{{model.modelName}}</span>
+    <span class="text-purple">results</span>:
+      - <span class="text-purple">task</span>: <span class="text-sky">infra-consolidation</span>
+        <span class="text-purple">metric</span>: <span class="text-sky">servers-reduced-ratio</span>
+        <span class="text-purple">value</span>: <span class="text-sky">94.4</span>
+<span class="text-muted">---</span>
+    </div>
+
+    {{!-- Title --}}
+    <h1 class="text-[28px] font-bold mb-5 pb-3 border-b border-border"># Model Card for {{site.username}}/{{model.modelName}}</h1>
+
+    <p class="mb-3.5">{{site.name}} is a full-stack engineering model specialized in shipping production systems under real-world constraints. He has demonstrated state-of-the-art performance on healthcare infrastructure consolidation, billing pipeline ownership, and AI-assisted clinical tooling. This card documents his capabilities, training history, and intended use.</p>
+
+    {{!-- Benchmark Results --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">📊 Benchmark Results</h2>
+    <p class="mb-3.5">Evaluated on <strong>SWE-Bench-Production</strong>, an internal benchmark measuring end-to-end engineering capability across six axes.</p>
+
+    {{> leaderboard}}
+
+    {{!-- Stack / Model Details --}}
+    <h2 id="stack" class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">🛠️ Stack &amp; Model Details</h2>
+    <ul class="mb-4 ml-6">
+      <li class="mb-1"><strong>Developed by:</strong> {{site.name}} (<a href="{{site.socials.[0].url}}">@{{site.username}}</a>)</li>
+      <li class="mb-1"><strong>Model type:</strong> Full-stack engineering model, senior tier</li>
+      <li class="mb-1"><strong>Language(s):</strong> {{#each site.languages}}{{#if @index}}, {{/if}}{{this}}{{/each}}</li>
+      <li class="mb-1"><strong>License:</strong> {{model.frontmatter.license}} (negotiable)</li>
+      <li class="mb-1"><strong>Finetuned from:</strong> <code class="bg-code-bg px-1.5 py-0.5 rounded font-mono text-[0.88em]">{{model.frontmatter.fineTunedFrom}}</code> → <code class="bg-code-bg px-1.5 py-0.5 rounded font-mono text-[0.88em]">{{model.modelName}}</code></li>
+      <li class="mb-1"><strong>Base model:</strong> <code class="bg-code-bg px-1.5 py-0.5 rounded font-mono text-[0.88em]">{{model.frontmatter.baseModel}}</code> (no formal bootcamp pretraining)</li>
+    </ul>
+
+    {{!-- Technical Specifications --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">⚙️ Technical Specifications</h2>
+    <h3 class="text-[16px] font-semibold mt-6 mb-2.5">Software</h3>
+    <p class="mb-3.5">Supported languages, runtimes, frameworks, and tools the model is fluent in:</p>
+    <div class="border border-border rounded-lg overflow-hidden mb-4">
+      <div class="grid grid-cols-[160px_1fr] max-md:grid-cols-1 max-md:gap-2 px-4.5 py-3.5 border-b border-border items-start">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-muted pt-1">Languages</div>
+        <div class="flex flex-wrap gap-1.5">
+          {{#each skills.languages}}
+          <span class="bg-bg border border-border px-2.5 py-0.5 rounded-full text-[11px] text-muted font-medium hover:border-border-strong hover:text-fg transition-colors">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+      <div class="grid grid-cols-[160px_1fr] max-md:grid-cols-1 max-md:gap-2 px-4.5 py-3.5 border-b border-border items-start">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-muted pt-1">Runtimes &amp; Frameworks</div>
+        <div class="flex flex-wrap gap-1.5">
+          {{#each skills.frameworks}}
+          <span class="bg-bg border border-border px-2.5 py-0.5 rounded-full text-[11px] text-muted font-medium hover:border-border-strong hover:text-fg transition-colors">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+      <div class="grid grid-cols-[160px_1fr] max-md:grid-cols-1 max-md:gap-2 px-4.5 py-3.5 border-b border-border items-start">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-muted pt-1">Databases</div>
+        <div class="flex flex-wrap gap-1.5">
+          {{#each skills.databases}}
+          <span class="bg-bg border border-border px-2.5 py-0.5 rounded-full text-[11px] text-muted font-medium hover:border-border-strong hover:text-fg transition-colors">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+      <div class="grid grid-cols-[160px_1fr] max-md:grid-cols-1 max-md:gap-2 px-4.5 py-3.5 border-b border-border items-start">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-muted pt-1">Infrastructure</div>
+        <div class="flex flex-wrap gap-1.5">
+          {{#each skills.devops}}
+          <span class="bg-bg border border-border px-2.5 py-0.5 rounded-full text-[11px] text-muted font-medium hover:border-border-strong hover:text-fg transition-colors">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+      <div class="grid grid-cols-[160px_1fr] max-md:grid-cols-1 max-md:gap-2 px-4.5 py-3.5 items-start">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-muted pt-1">Tooling &amp; Testing</div>
+        <div class="flex flex-wrap gap-1.5">
+          {{#each skills.tools}}
+          <span class="bg-bg border border-border px-2.5 py-0.5 rounded-full text-[11px] text-muted font-medium hover:border-border-strong hover:text-fg transition-colors">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+    {{!-- Uses --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">🎯 Uses</h2>
+    <h3 class="text-[16px] font-semibold mt-6 mb-2.5">Direct Use</h3>
+    <p class="mb-3.5">Intended for deployment on full-stack engineering problems requiring end-to-end ownership. Strongest on healthcare infrastructure, subscription SaaS, billing systems, and AI-adjacent tooling.</p>
+
+    <h3 class="text-[16px] font-semibold mt-6 mb-2.5">Downstream Use</h3>
+    <p class="mb-3.5">Can be integrated into existing engineering teams as a senior contributor. Plays well with other models. Effective at mentoring <code class="bg-code-bg px-1.5 py-0.5 rounded font-mono text-[0.88em]">golosinda-junior-*</code> variants.</p>
+
+    <h3 class="text-[16px] font-semibold mt-6 mb-2.5">Out-of-Scope Use</h3>
+    <p class="mb-3.5">Not optimized for: management-only roles, environments requiring more than two layers of approval, or teams that prefer five-hour meetings over shipping.</p>
+
+    {{!-- Bias, Risks, Limitations --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">⚠️ Bias, Risks, and Limitations</h2>
+    <blockquote class="border-l-3 border-yellow px-4 py-2 bg-yellow-soft text-yellow-text my-4 text-[13px] rounded">Users should be aware of the following behaviors before deployment:</blockquote>
+    <ul class="mb-4 ml-6">
+      <li class="mb-1">Knows how to center a <code class="bg-code-bg px-1.5 py-0.5 rounded font-mono text-[0.88em]">&lt;div&gt;</code> — and isn't afraid to prove it</li>
+      <li class="mb-1">Strong preference for monorepo architecture on all projects</li>
+      <li class="mb-1">Tends to push back on architectural decisions he disagrees with</li>
+      <li class="mb-1">Has been known to consolidate 90 servers into 5 without warning</li>
+      <li class="mb-1">Currently operating on night-shift schedule only (DVO timezone)</li>
+    </ul>
+
+    {{!-- How to Get Started --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">🚀 How to Get Started</h2>
+    <pre class="bg-code-bg border border-border rounded-lg px-5 py-4 font-mono text-[12px] leading-[1.7] overflow-x-auto mb-4"><span class="text-muted italic"># Install and load the model</span>
+<span class="text-purple font-medium">from</span> golosinda <span class="text-purple font-medium">import</span> SeniorEngineer
+
+model = SeniorEngineer.from_pretrained(
+    <span class="text-green">"{{site.username}}/{{model.modelName}}"</span>,
+    specialization=<span class="text-green">"healthcare"</span>,
+    availability=<span class="text-green">"contract"</span>,
+)
+
+<span class="text-muted italic"># Deploy to your production system</span>
+result = model.<span class="text-sky">deploy</span>(
+    project=<span class="text-green">"your-production-system"</span>,
+    constraints=[<span class="text-green">"ship-fast"</span>, <span class="text-green">"own-outcome"</span>],
+    stack=[<span class="text-green">"typescript"</span>, <span class="text-green">"postgres"</span>, <span class="text-green">"react"</span>],
+)
+
+<span class="text-sky">print</span>(result.outcome)
+<span class="text-muted italic"># &gt;&gt;&gt; "shipped. metrics improved. team happy."</span></pre>
+
+    {{!-- Training Details / Work --}}
+    <h2 id="work" class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">🧠 Training Details</h2>
+    <h3 class="text-[16px] font-semibold mt-6 mb-2.5">Training Data</h3>
+    <p class="mb-3.5">Fine-tuned on a curated corpus of {{experience.length}} production environments:</p>
+    <ul class="mb-4 ml-6">
+      {{#each experience}}
+      <li class="mb-1"><code class="bg-code-bg px-1.5 py-0.5 rounded font-mono text-[0.88em]">{{this.slug}}</code> — {{this.description}}</li>
+      {{/each}}
+    </ul>
+
+    <h3 class="text-[16px] font-semibold mt-6 mb-2.5">Training Procedure</h3>
+    <ul class="mb-4 ml-6">
+      <li class="mb-1"><strong>Training regime:</strong> On-the-job, 7 years, no bootcamp</li>
+      <li class="mb-1"><strong>Hardware:</strong> PC (Windows) — MacBook Pro reserved for Theoria Medical work only</li>
+      <li class="mb-1"><strong>Optimizer:</strong> Coffee, deadlines, curiosity</li>
+      <li class="mb-1"><strong>Total training hours:</strong> ~14,000</li>
+    </ul>
+
+    {{!-- Projects --}}
+    <h2 id="projects" class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">📦 Projects</h2>
+    <p class="mb-3.5">Spaces and deployments using this model:</p>
+    <ul class="mb-4 ml-6">
+      {{#each projects}}
+      <li class="mb-1">
+        {{this.emoji}} <strong>{{this.title}}</strong> — {{this.description}}
+        {{#if this.url}}{{> link-preview og=this.urlOg url=this.url}}{{/if}}
+        {{#if this.repo}}{{> link-preview og=this.repoOg url=this.repo}}{{/if}}
+        <div class="flex gap-1.5 flex-wrap mt-1.5">
+          {{#each this.tags}}
+          <span class="bg-bg border border-border px-2.5 py-0.5 rounded-full text-[11px] text-muted font-medium">{{this}}</span>
+          {{/each}}
+        </div>
+      </li>
+      {{/each}}
+    </ul>
+
+    {{!-- Evaluation --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">📈 Evaluation</h2>
+    <p class="mb-3.5">In addition to SWE-Bench-Production (above), the model has received external validation:</p>
+    <blockquote class="border-l-3 border-yellow px-4 py-2 bg-yellow-soft text-yellow-text my-4 text-[13px] rounded">🌟 <strong>Shining Star Award</strong> — Theoria Medical, 2025/2026 · Awarded for outstanding contributions to infrastructure and clinical AI tooling.</blockquote>
+
+    {{!-- Environmental Impact --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">🌱 Environmental Impact</h2>
+    <ul class="mb-4 ml-6">
+      <li class="mb-1"><strong>Hardware Type:</strong> PC (Windows) + MacBook Pro (Theoria only)</li>
+      <li class="mb-1"><strong>Hours used:</strong> ~14,000 (across 7 years)</li>
+      <li class="mb-1"><strong>Cloud Provider:</strong> Various (Azure, Vultr, DigitalOcean)</li>
+      <li class="mb-1"><strong>Compute Region:</strong> Davao, Philippines</li>
+      <li class="mb-1"><strong>Carbon Emitted:</strong> Minimal. Powered primarily by coffee.</li>
+    </ul>
+
+    {{!-- Citation --}}
+    <h2 class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">📚 Citation</h2>
+    <p class="mb-3.5"><strong>BibTeX:</strong></p>
+    <div class="bg-code-bg border border-border rounded-lg px-4.5 py-3.5 font-mono text-[11px] leading-[1.7] whitespace-pre overflow-x-auto text-fg">@engineer{golosinda{{year}},
+  title   = {Golosinda Senior: A Full-Stack Engineering Model
+             for Production Systems},
+  author  = { {{site.name}} },
+  year    = { {{year}} },
+  version = {v7.0},
+  url     = { {{site.url}} },
+  contact = { {{site.email}} },
+}</div>
+
+    {{!-- Contact --}}
+    <h2 id="contact" class="text-[20px] font-bold mt-9 mb-3.5 pb-1.5 border-b border-border">📬 Contact</h2>
+    <p class="mb-3.5">
+      <span class="inline-flex items-center gap-1"><img src="/assets/icons/gmail.svg" class="w-4 h-4" alt="Email"> <a href="mailto:{{site.email}}" class="text-blue">{{site.email}}</a></span>
+      <span class="text-muted mx-1.5">·</span>
+      <span class="inline-flex items-center gap-1"><img src="/assets/icons/github.svg" class="w-4 h-4" alt="GitHub"> <a href="https://github.com/vexCoder" target="_blank" rel="noopener noreferrer" class="text-blue">github.com/vexCoder</a></span>
+      <span class="text-muted mx-1.5">·</span>
+      <span class="inline-flex items-center gap-1"><img src="/assets/icons/linkedin.svg" class="w-4 h-4" alt="LinkedIn"> <a href="https://linkedin.com/in/ig08" target="_blank" rel="noopener noreferrer" class="text-blue">linkedin.com/in/ig08</a></span>
+    </p>
+  </div>
+
+  {{> info-panel}}
+
+</div>

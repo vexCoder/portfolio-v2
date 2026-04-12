@@ -1,0 +1,7 @@
+{
+  "languages": ["TypeScript", "JavaScript", "Node.js", "Dart", "Go", "Rust", "GDScript"],
+  "frameworks": ["React", "Express", "GraphQL", "Flutter", "Electron", "Tauri"],
+  "databases": ["PostgreSQL", "MongoDB", "SQLite", "Redis"],
+  "devops": ["Docker", "Nginx", "PM2", "Linux", "DNS", "Azure", "Vultr", "DigitalOcean"],
+  "tools": ["Git", "GitHub", "GitLab", "BullMQ", "Jest", "Puppeteer"]
+}

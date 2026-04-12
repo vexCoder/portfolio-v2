@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@source "../templates/**/*.hbs";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --color-primary: #2563eb;
+    --color-bg: #ffffff;
+    --color-bg-soft: #f8fafc;
+    --color-code-bg: #f1f5f9;
+    --color-fg: #0f172a;
+    --color-muted: #64748b;
+    --color-border: #e5e7eb;
+    --color-border-strong: #cbd5e1;
+    --color-yellow: #ffd21e;
+    --color-yellow-soft: #fff8d6;
+    --color-yellow-text: #78350f;
+    --color-yellow-rank: #b45309;
+    --color-blue: #2563eb;
+    --color-green: #16a34a;
+    --color-purple: #7c3aed;
+    --color-sky: #0369a1;
+    --color-red: #dc2626;
+    --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+[id] {
+    scroll-margin-top: 4rem;
+}
+
+/* Dark theme — HuggingFace-inspired dark navy */
+.dark {
+    --color-bg: #0f1524;
+    --color-bg-soft: #1a2332;
+    --color-code-bg: #1e293b;
+    --color-fg: #e5e7eb;
+    --color-muted: #94a3b8;
+    --color-border: #334155;
+    --color-border-strong: #475569;
+    --color-yellow-soft: #422006;
+    --color-yellow-text: #fbbf24;
+    --color-yellow-rank: #f59e0b;
+    --color-blue: #60a5fa;
+    --color-green: #4ade80;
+    --color-purple: #a78bfa;
+    --color-sky: #38bdf8;
+    --color-red: #f87171;
+}

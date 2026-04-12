@@ -1,0 +1,55 @@
+[
+  {
+    "slug": "theoria-medical-senior",
+    "company": "Theoria Medical",
+    "role": "Senior App Developer",
+    "period": "Jul 2025 - Present",
+    "location": "Michigan, Remote",
+    "description": "Healthcare infrastructure and AI clinical tooling at senior level.",
+    "highlights": [
+      "Drove resolution of critical missing-notes incident, consolidating infrastructure from 90 servers to 5",
+      "Built AI-powered ICD-10 search used by every provider for clinical documentation",
+      "Owned automated billing workflow responsible for ~80% of Theoria's revenue",
+      "Received Shining Star Award for outstanding contributions (2025-2026)"
+    ]
+  },
+  {
+    "slug": "theoria-medical-mid",
+    "company": "Theoria Medical",
+    "role": "Mid Full-Stack Developer",
+    "period": "Aug 2023 - Jul 2025",
+    "location": "Michigan, Remote",
+    "description": "Healthcare infrastructure dataset. Built developer tooling and billing automation.",
+    "highlights": [
+      "Built feature-flag and UAT system from scratch, used for feature toggles and gated rollouts",
+      "Aggregated cross-department billing data for external payment processing partners",
+      "Reduced noting time and coding errors with AI-powered ICD-10 natural-language search"
+    ]
+  },
+  {
+    "slug": "petchef",
+    "company": "PetChef",
+    "role": "Full-Stack Developer",
+    "period": "Oct 2020 - Aug 2023",
+    "location": "Malaysia, Remote",
+    "description": "Subscription SaaS dataset. Entire platform built solo — Next.js portal, Vite admin, Express/GraphQL API.",
+    "highlights": [
+      "Built pet meal subscription platform from the ground up as sole developer — TypeScript monorepo (Yarn workspaces + Turborepo)",
+      "Implemented recurring billing with Stripe (webhooks, invoice generation, failed-payment recovery)",
+      "Integrated Stripe, Pipedrive, Wati (WhatsApp), Zendesk, Google Analytics, Sendy",
+      "Deployed on VPS with Node.js cluster mode and Socket.IO sticky sessions, serving 1,000+ subscribers"
+    ]
+  },
+  {
+    "slug": "freelance-corpus",
+    "company": "Freelance",
+    "role": "Web Developer",
+    "period": "Jan 2018 - Oct 2020",
+    "location": "Self-Employed",
+    "description": "Web3 automation and scraping dataset. Formative pretraining period.",
+    "highlights": [
+      "Built terminal-based Web3 game bot for automated gameplay and on-chain interactions",
+      "Developed scraping and automation bot for FIFA Ultimate Team marketplace"
+    ]
+  }
+]
