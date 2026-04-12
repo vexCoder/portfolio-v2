@@ -45,6 +45,16 @@ function scp(local: string, remote: string, label: string) {
   execSync(`scp ${scpOpts} "${local}" ${user}@${host}:${remote}`, { stdio: "inherit" });
 }
 
+function scpDir(localDir: string, remoteDir: string, label: string) {
+  if (!existsSync(localDir)) {
+    console.log(`  ⚠ Skip (not found): ${localDir}`);
+    return;
+  }
+  console.log(`  → ${label}`);
+  ssh(`mkdir -p ${remoteDir}`, `Ensuring ${remoteDir}`);
+  execSync(`scp -r ${scpOpts} "${localDir}/." ${user}@${host}:${remoteDir}`, { stdio: "inherit" });
+}
+
 function ssh(cmd: string, label: string) {
   console.log(`  → ${label}`);
   execSync(`ssh ${sshOpts} ${user}@${host} "${cmd}"`, { stdio: "inherit" });
@@ -54,6 +64,20 @@ function ssh(cmd: string, label: string) {
 console.log("\n📄 Uploading resume...");
 const resumeLocal = resolve(root, "packages/frontend/src/assets/resume.pdf");
 scp(resumeLocal, `${remoteBase}/packages/frontend/src/assets/resume.pdf`, "resume.pdf");
+
+// --- Upload Assets (icons, images, static files) ---
+console.log("\n🖼 Uploading assets...");
+const assetsBase = resolve(root, "packages/frontend/src/assets");
+const remoteAssets = `${remoteBase}/packages/frontend/src/assets`;
+
+// Directories
+scpDir(resolve(assetsBase, "icons"), `${remoteAssets}/icons`, "icons/");
+scpDir(resolve(assetsBase, "images"), `${remoteAssets}/images`, "images/");
+
+// Root asset files
+for (const file of ["favicon.svg", "apple-touch-icon.png", "logo.png"]) {
+  scp(resolve(assetsBase, file), `${remoteAssets}/${file}`, file);
+}
 
 // --- Upload Data JSONs ---
 console.log("\n📦 Uploading data files...");

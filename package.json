@@ -9,6 +9,7 @@
     "build:css": "pnpm --filter @portfolio/frontend build:css",
     "build:server": "pnpm --filter @portfolio/server build",
     "build:artifacts": "tsx scripts/build.ts artifacts",
+    "deploy": "tsx scripts/build.ts artifacts && node ./artifacts/server.js",
     "upload": "tsx scripts/upload.ts"
   },
   "devDependencies": {

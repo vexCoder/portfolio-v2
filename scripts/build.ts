@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { cpSync, mkdirSync, rmSync, existsSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, rmSync, existsSync, writeFileSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -31,6 +31,7 @@ async function buildArtifacts() {
   await build({
     entryPoints: [resolve(server, "src/index.ts")],
     bundle: true,
+    define: { "process.env.NODE_ENV": '"production"' },
     platform: "node",
     target: "node18",
     format: "esm",
@@ -66,9 +67,13 @@ async function buildArtifacts() {
     { recursive: true },
   );
 
-  // 6. Create empty data dir (server auto-inits on first boot)
-  console.log("→ Creating data directory");
+  // 6. Create data dir and copy data JSONs
+  console.log("→ Copying data files");
   mkdirSync(resolve(artifacts, "data"), { recursive: true });
+  const dataDir = resolve(server, "src/data");
+  for (const f of readdirSync(dataDir).filter(f => f.endsWith(".json"))) {
+    cpSync(resolve(dataDir, f), resolve(artifacts, "data", f));
+  }
 
   // 7. Write package.json for ESM support
   writeFileSync(

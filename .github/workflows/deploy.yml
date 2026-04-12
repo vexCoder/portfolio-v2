@@ -23,9 +23,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Stamp deploy time
-        run: echo '{"lastUpdated":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > packages/server/src/data/deploy.json
+        run: |
+          mkdir -p packages/server/src/data
+          echo '{"lastUpdated":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > packages/server/src/data/deploy.json
 
-      - run: pnpm run build
+      - name: Build artifacts
+        run: pnpm run build:artifacts
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -34,11 +37,11 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          source: "packages/,scripts/,package.json,pnpm-workspace.yaml,pnpm-lock.yaml,tsconfig.json"
+          source: "artifacts/"
           target: ~/git/portfolio
           overwrite: true
 
-      - name: Install and restart
+      - name: Restart
         uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -48,7 +51,6 @@ jobs:
           script: |
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            cd ~/git/portfolio
-            pnpm install --frozen-lockfile --prod
-            pm2 restart portfolio || pm2 start packages/server/dist/index.js --name portfolio
+            cd ~/git/portfolio/artifacts
+            pm2 restart portfolio || pm2 start server.js --name portfolio --env NODE_ENV=production
             pm2 save
