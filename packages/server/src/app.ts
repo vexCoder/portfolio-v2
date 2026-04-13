@@ -1,4 +1,5 @@
 import path from "node:path";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import { engine } from "express-handlebars";
@@ -67,6 +68,15 @@ app.engine(
       eq: (a: unknown, b: unknown) => a === b,
       formatNumber: (n: number) => n.toLocaleString(),
       json: (obj: unknown) => JSON.stringify(obj),
+      asset: (filePath: string) => {
+        const diskPath = path.join(assetsDir, filePath.replace(/^\/assets\//, ""));
+        try {
+          const mtime = fs.statSync(diskPath).mtimeMs;
+          return `${filePath}?v=${Math.floor(mtime)}`;
+        } catch {
+          return filePath;
+        }
+      },
       timeAgo: (iso: string) => {
         const diff = Date.now() - new Date(iso).getTime();
         const mins = Math.floor(diff / 60000);
@@ -86,9 +96,10 @@ app.set("view engine", "hbs");
 app.set("views", path.join(templatesDir, "views"));
 
 // Static files
-app.use("/css", express.static(cssDir));
-app.use("/assets", express.static(assetsDir));
-app.use(express.static(assetsDir));
+const staticOpts = { etag: true, lastModified: true, maxAge: isProd ? "7d" : 0 };
+app.use("/css", express.static(cssDir, staticOpts));
+app.use("/assets", express.static(assetsDir, staticOpts));
+app.use(express.static(assetsDir, staticOpts));
 
 // Prefetch OG data for project links at startup
 const projectUrls = projects.flatMap((p) => [p.url, p.repo].filter(Boolean)) as string[];
