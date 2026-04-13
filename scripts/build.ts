@@ -67,11 +67,13 @@ async function buildArtifacts() {
     { recursive: true },
   );
 
-  // 6. Copy data JSONs (for upload script — deploy pipeline skips data)
+  // 6. Copy data JSONs (skip runtime-managed files that live on the VPS)
   console.log("→ Copying data files");
   mkdirSync(resolve(artifacts, "data"), { recursive: true });
   const dataDir = resolve(server, "src/data");
+  const skipData = new Set(["analytics.json", "interactions.json", "deploy.json"]);
   for (const f of readdirSync(dataDir).filter(f => f.endsWith(".json"))) {
+    if (skipData.has(f)) continue;
     cpSync(resolve(dataDir, f), resolve(artifacts, "data", f));
   }
 
