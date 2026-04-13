@@ -46,6 +46,10 @@ const assetsDir = isProd
 
 const app: ReturnType<typeof express> = express();
 
+if (isProd) {
+  app.set("trust proxy", 1);
+}
+
 // JSON body parsing for API endpoints
 app.use(express.json());
 
@@ -81,9 +85,10 @@ app.set("view engine", "hbs");
 app.set("views", path.join(templatesDir, "views"));
 
 // Static files
-app.use("/css", express.static(cssDir));
-app.use("/assets", express.static(assetsDir));
-app.use(express.static(assetsDir));
+const cacheOpts = isProd ? { maxAge: "7d" } : {};
+app.use("/css", express.static(cssDir, cacheOpts));
+app.use("/assets", express.static(assetsDir, cacheOpts));
+app.use(express.static(assetsDir, cacheOpts));
 
 // Prefetch OG data for project links at startup
 const projectUrls = projects.flatMap((p) => [p.url, p.repo].filter(Boolean)) as string[];
@@ -147,5 +152,18 @@ app.get("/api/download", (_req, res) => {
 app.get("/api/analytics", (_req, res) => {
   res.json(getRecentAnalytics(30));
 });
+
+// Global error handler
+app.use(
+  (
+    err: Error,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error("Unhandled error:", err);
+    res.status(500).send(isProd ? "Internal server error" : err.message);
+  },
+);
 
 export default app;
