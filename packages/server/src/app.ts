@@ -10,6 +10,7 @@ import {
   skills,
   getModel,
   recordEvent,
+  recordUniqueView,
   getRecentAnalytics,
   computeTrends,
   getAnalyticsTotals,
@@ -85,10 +86,9 @@ app.set("view engine", "hbs");
 app.set("views", path.join(templatesDir, "views"));
 
 // Static files
-const cacheOpts = isProd ? { maxAge: "7d" } : {};
-app.use("/css", express.static(cssDir, cacheOpts));
-app.use("/assets", express.static(assetsDir, cacheOpts));
-app.use(express.static(assetsDir, cacheOpts));
+app.use("/css", express.static(cssDir));
+app.use("/assets", express.static(assetsDir));
+app.use(express.static(assetsDir));
 
 // Prefetch OG data for project links at startup
 const projectUrls = projects.flatMap((p) => [p.url, p.repo].filter(Boolean)) as string[];
@@ -97,10 +97,10 @@ prefetchOgData(projectUrls);
 // --- Pages ---
 
 app.get("/", async (req, res) => {
-  recordEvent("views");
+  const ip = getClientIp(req);
+  recordUniqueView(ip);
   const model = getModel();
   const totals = getAnalyticsTotals();
-  const ip = getClientIp(req);
   const starred = hasStarred(ip);
   const lastUpdated = getLastUpdated();
   const analytics = getRecentAnalytics(30);

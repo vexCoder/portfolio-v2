@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import type {
   PortfolioData,
@@ -12,6 +13,7 @@ import type {
   Analytics,
   DailyStats,
   Interactions,
+  ViewLog,
 } from "../schema/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -113,6 +115,7 @@ export const skills = initJson<Skills>("skills.json", defaultSkills);
 initJson<ModelMeta>("model.json", defaultModel);
 initJson<Analytics>("analytics.json", {});
 initJson<Interactions>("interactions.json", { stars: [] });
+initJson<ViewLog>("viewlog.json", {});
 writeJson("deploy.json", { lastUpdated: new Date().toISOString() });
 
 export function getLastUpdated(): string {
@@ -154,6 +157,10 @@ export function recordEvent(type: keyof DailyStats): void {
   writeJson("analytics.json", analytics);
 }
 
+function hashIp(ip: string): string {
+  return crypto.createHash("sha256").update(ip).digest("hex");
+}
+
 // Interactions — IP-based dedup for stars
 function getInteractions(): Interactions {
   return readJson<Interactions>("interactions.json");
@@ -164,14 +171,15 @@ function saveInteractions(data: Interactions): void {
 }
 
 export function hasStarred(ip: string): boolean {
-  return getInteractions().stars.includes(ip);
+  return getInteractions().stars.includes(hashIp(ip));
 }
 
 export function toggleStar(ip: string): boolean {
+  const hash = hashIp(ip);
   const data = getInteractions();
-  const idx = data.stars.indexOf(ip);
+  const idx = data.stars.indexOf(hash);
   if (idx === -1) {
-    data.stars.push(ip);
+    data.stars.push(hash);
     recordEvent("stars");
     saveInteractions(data);
     return true;
@@ -179,6 +187,17 @@ export function toggleStar(ip: string): boolean {
   data.stars.splice(idx, 1);
   saveInteractions(data);
   return false;
+}
+
+export function recordUniqueView(ip: string): void {
+  const hash = hashIp(ip);
+  const log = readJson<ViewLog>("viewlog.json");
+  const today = todayKey();
+  if (!log[today]) log[today] = [];
+  if (log[today].includes(hash)) return;
+  log[today].push(hash);
+  writeJson("viewlog.json", log);
+  recordEvent("views");
 }
 
 export function getStarCount(): number {

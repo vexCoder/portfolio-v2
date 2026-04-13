@@ -71,7 +71,7 @@ async function buildArtifacts() {
   console.log("→ Copying data files");
   mkdirSync(resolve(artifacts, "data"), { recursive: true });
   const dataDir = resolve(server, "src/data");
-  const skipData = new Set(["analytics.json", "interactions.json", "deploy.json"]);
+  const skipData = new Set(["analytics.json", "interactions.json", "deploy.json", "viewlog.json"]);
   for (const f of readdirSync(dataDir).filter(f => f.endsWith(".json"))) {
     if (skipData.has(f)) continue;
     cpSync(resolve(dataDir, f), resolve(artifacts, "data", f));

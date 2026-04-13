@@ -90,6 +90,8 @@ export interface Interactions {
   stars: string[];
 }
 
+export type ViewLog = Record<string, string[]>;
+
 export interface PortfolioData {
   site: SiteConfig;
   projects: Project[];

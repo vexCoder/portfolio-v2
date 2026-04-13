@@ -68,7 +68,7 @@ console.log("\n🖼 Uploading assets...");
 scpDir(resolve(artifacts, "assets"), `${remoteBase}/assets`, "assets/");
 
 // --- Upload data (content only, skip runtime-managed files) ---
-const skipData = new Set(["analytics.json", "interactions.json", "deploy.json"]);
+const skipData = new Set(["analytics.json", "interactions.json", "deploy.json", "viewlog.json"]);
 const dataDir = resolve(artifacts, "data");
 
 if (existsSync(dataDir)) {
