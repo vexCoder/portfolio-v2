@@ -67,7 +67,7 @@ async function buildArtifacts() {
     { recursive: true },
   );
 
-  // 6. Create data dir and copy data JSONs
+  // 6. Copy data JSONs (for upload script — deploy pipeline skips data)
   console.log("→ Copying data files");
   mkdirSync(resolve(artifacts, "data"), { recursive: true });
   const dataDir = resolve(server, "src/data");

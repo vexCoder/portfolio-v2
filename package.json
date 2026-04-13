@@ -9,8 +9,9 @@
     "build:css": "pnpm --filter @portfolio/frontend build:css",
     "build:server": "pnpm --filter @portfolio/server build",
     "build:artifacts": "tsx scripts/build.ts artifacts",
-    "deploy": "tsx scripts/build.ts artifacts && node ./artifacts/server.js",
-    "upload": "tsx scripts/upload.ts"
+    "compile": "tsx scripts/build.ts artifacts",
+    "deploy": "pnpm compile && node ./artifacts/server.js",
+    "upload": "pnpm compile && tsx scripts/upload.ts"
   },
   "devDependencies": {
     "esbuild": "^0.28.0",

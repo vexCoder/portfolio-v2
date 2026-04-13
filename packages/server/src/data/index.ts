@@ -55,7 +55,7 @@ const defaultSite: SiteConfig = {
   email: "ig08.work@gmail.com",
   title: "Portfolio",
   description: "Full-stack engineering model specialized in shipping production systems under real-world constraints.",
-  url: "https://github.com/vexCoder",
+  url: "https://ivangolosinda.com",
   website: "ivangolosinda.com",
   region: "DVO \ud83c\uddf5\ud83c\udded",
   languages: ["en", "tl"],
@@ -113,7 +113,7 @@ export const skills = initJson<Skills>("skills.json", defaultSkills);
 initJson<ModelMeta>("model.json", defaultModel);
 initJson<Analytics>("analytics.json", {});
 initJson<Interactions>("interactions.json", { stars: [] });
-initJson<{ lastUpdated: string }>("deploy.json", { lastUpdated: new Date().toISOString() });
+writeJson("deploy.json", { lastUpdated: new Date().toISOString() });
 
 export function getLastUpdated(): string {
   return readJson<{ lastUpdated: string }>("deploy.json").lastUpdated;

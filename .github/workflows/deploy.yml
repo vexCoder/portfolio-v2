@@ -22,11 +22,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Stamp deploy time
-        run: |
-          mkdir -p packages/server/src/data
-          echo '{"lastUpdated":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > packages/server/src/data/deploy.json
-
       - name: Build artifacts
         run: pnpm run build:artifacts
 

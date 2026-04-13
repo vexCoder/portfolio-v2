@@ -57,42 +57,28 @@ function scpDir(localDir: string, remoteDir: string, label: string) {
 
 function ssh(cmd: string, label: string) {
   console.log(`  → ${label}`);
-  execSync(`ssh ${sshOpts} ${user}@${host} "${cmd}"`, { stdio: "inherit" });
+  const init = 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"';
+  execSync(`ssh ${sshOpts} ${user}@${host} "${init} && ${cmd}"`, { stdio: "inherit" });
 }
 
-// --- Upload Resume ---
-console.log("\n📄 Uploading resume...");
-const resumeLocal = resolve(root, "packages/frontend/src/assets/resume.pdf");
-scp(resumeLocal, `${remoteBase}/packages/frontend/src/assets/resume.pdf`, "resume.pdf");
+const artifacts = resolve(root, "artifacts");
 
-// --- Upload Assets (icons, images, static files) ---
+// --- Upload assets from artifacts ---
 console.log("\n🖼 Uploading assets...");
-const assetsBase = resolve(root, "packages/frontend/src/assets");
-const remoteAssets = `${remoteBase}/packages/frontend/src/assets`;
+scpDir(resolve(artifacts, "assets"), `${remoteBase}/assets`, "assets/");
 
-// Directories
-scpDir(resolve(assetsBase, "icons"), `${remoteAssets}/icons`, "icons/");
-scpDir(resolve(assetsBase, "images"), `${remoteAssets}/images`, "images/");
+// --- Upload data (content only, skip runtime-managed files) ---
+const skipData = new Set(["analytics.json", "interactions.json", "deploy.json"]);
+const dataDir = resolve(artifacts, "data");
 
-// Root asset files
-for (const file of ["favicon.svg", "apple-touch-icon.png", "logo.png"]) {
-  scp(resolve(assetsBase, file), `${remoteAssets}/${file}`, file);
-}
-
-// --- Upload Data JSONs ---
-console.log("\n📦 Uploading data files...");
-const dataDir = resolve(root, "packages/server/src/data");
-const jsonFiles = readdirSync(dataDir).filter((f) => f.endsWith(".json"));
-
-// Ensure remote data dirs exist
-ssh(`mkdir -p ${remoteBase}/packages/server/src/data ${remoteBase}/packages/server/dist/data`, "Ensuring remote directories");
-
-for (const file of jsonFiles) {
-  const local = resolve(dataDir, file);
-  // Upload to source (for rebuilds)
-  scp(local, `${remoteBase}/packages/server/src/data/${file}`, `src/data/${file}`);
-  // Upload to dist (runtime path)
-  scp(local, `${remoteBase}/packages/server/dist/data/${file}`, `dist/data/${file}`);
+if (existsSync(dataDir)) {
+  console.log("\n📦 Uploading data files...");
+  ssh(`mkdir -p ${remoteBase}/data`, "Ensuring remote data dir");
+  for (const file of readdirSync(dataDir).filter(f => f.endsWith(".json") && !skipData.has(f))) {
+    scp(resolve(dataDir, file), `${remoteBase}/data/${file}`, `data/${file}`);
+  }
+} else {
+  console.log("\n⚠ No artifacts/data/ found — run build:artifacts first if you need to upload data");
 }
 
 // --- Restart pm2 ---
