@@ -126,7 +126,7 @@ app.get("/", async (req, res) => {
   );
 
   res.render("home", {
-    title: site.title,
+    title: `${site.username}/${model.modelName}`,
     site,
     model,
     projects: enrichedProjects,

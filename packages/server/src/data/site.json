@@ -1,9 +1,9 @@
 {
-  "name": "Ivan Paul C. Golosinda",
+  "name": "Ivan Paul C. Golosinda - Senior App Dev",
   "username": "vexCoder",
   "email": "ig08.work@gmail.com",
   "title": "Portfolio",
-  "description": "Full-stack engineering model specialized in shipping production systems under real-world constraints.",
+  "description": "Model Card for Ivan Paul C. Golosinda — senior full-stack engineer at Theoria Medical. Passionate about AI, dabbles in game development.",
   "url": "https://ivangolosinda.com",
   "website": "ivangolosinda.com",
   "region": "DVO \ud83c\uddf5\ud83c\udded",
@@ -18,6 +18,16 @@
       "platform": "linkedin",
       "url": "https://linkedin.com/in/ig08",
       "label": "LinkedIn"
+    },
+    {
+      "platform": "instagram",
+      "url": "https://www.instagram.com/likeanormie",
+      "label": "Instagram"
+    },
+    {
+      "platform": "facebook",
+      "url": "https://www.facebook.com/ivan.golosinda.1",
+      "label": "Facebook"
     }
   ]
 }

@@ -1,12 +1,12 @@
 <meta property="og:type" content="{{#if og.type}}{{og.type}}{{else}}website{{/if}}">
 <meta property="og:site_name" content="{{site.name}}">
 <meta property="og:title" content="{{#if og.title}}{{og.title}}{{else}}{{title}}{{/if}}">
-<meta property="og:description" content="{{#if og.description}}{{og.description}}{{else}}Portfolio site{{/if}}">
+<meta property="og:description" content="{{#if og.description}}{{og.description}}{{else}}{{site.description}}{{/if}}">
 <meta property="og:image" content="{{site.url}}{{#if og.image}}{{asset og.image}}{{else}}{{asset "/assets/images/og-image.png"}}{{/if}}">
 <meta property="og:url" content="{{#if og.url}}{{og.url}}{{else}}{{site.url}}{{/if}}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{#if og.title}}{{og.title}}{{else}}{{title}}{{/if}}">
-<meta name="twitter:description" content="{{#if og.description}}{{og.description}}{{else}}Portfolio site{{/if}}">
+<meta name="twitter:description" content="{{#if og.description}}{{og.description}}{{else}}{{site.description}}{{/if}}">
 <meta name="twitter:image" content="{{site.url}}{{#if og.image}}{{asset og.image}}{{else}}{{asset "/assets/images/og-image.png"}}{{/if}}">
-<meta name="description" content="{{#if og.description}}{{og.description}}{{else}}Portfolio site{{/if}}">
+<meta name="description" content="{{#if og.description}}{{og.description}}{{else}}{{site.description}}{{/if}}">
 <link rel="canonical" href="{{#if og.url}}{{og.url}}{{else}}{{site.url}}{{/if}}">
