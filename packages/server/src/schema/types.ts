@@ -12,6 +12,7 @@ export interface SiteConfig {
   description: string;
   url: string;
   website?: string;
+  repo: string;
   region: string;
   languages: string[];
   socials: Social[];

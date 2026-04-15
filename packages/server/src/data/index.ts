@@ -55,6 +55,7 @@ const defaultSite: SiteConfig = {
     "Full-stack engineering model specialized in shipping production systems under real-world constraints.",
   url: "https://ivangolosinda.com",
   website: "ivangolosinda.com",
+  repo: "https://github.com/vexCoder/portfolio-v2",
   region: "DVO \ud83c\uddf5\ud83c\udded",
   languages: ["en", "tl"],
   socials: [
