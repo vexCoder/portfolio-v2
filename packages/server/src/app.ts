@@ -139,7 +139,7 @@ app.get("/", async (req, res) => {
     starred,
     lastUpdated,
     og: {
-      title: site.title,
+      title: site.name,
       description: site.description,
       url: site.url,
     },

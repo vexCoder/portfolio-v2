@@ -6,8 +6,10 @@
   <title>{{title}}</title>
   <link rel="icon" type="image/png" sizes="192x192" href="{{asset "/assets/favicon-192.png"}}">
   <link rel="icon" type="image/png" sizes="48x48" href="{{asset "/assets/favicon-48.png"}}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{asset "/assets/favicon-32.png"}}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{asset "/assets/favicon-16.png"}}">
   <link rel="icon" type="image/svg+xml" href="{{asset "/assets/favicon.svg"}}">
-  <link rel="apple-touch-icon" href="{{asset "/assets/apple-touch-icon.png"}}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{asset "/assets/apple-touch-icon.png"}}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -18,6 +20,17 @@
   {{> og}}
   <meta name="author" content="{{site.name}}">
   <meta property="og:locale" content="en_US">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-title" content="{{site.shortName}}">
+  <meta name="application-name" content="{{site.shortName}}">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{site.shortName}}",
+    "url": "{{site.url}}"
+  }
+  </script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",

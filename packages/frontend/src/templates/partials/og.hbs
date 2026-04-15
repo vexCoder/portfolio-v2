@@ -1,5 +1,5 @@
 <meta property="og:type" content="{{#if og.type}}{{og.type}}{{else}}website{{/if}}">
-<meta property="og:site_name" content="{{site.name}}">
+<meta property="og:site_name" content="{{site.shortName}}">
 <meta property="og:title" content="{{#if og.title}}{{og.title}}{{else}}{{title}}{{/if}}">
 <meta property="og:description" content="{{#if og.description}}{{og.description}}{{else}}{{site.description}}{{/if}}">
 <meta property="og:image" content="{{site.url}}{{#if og.image}}{{asset og.image}}{{else}}{{asset "/assets/images/og-image.png"}}{{/if}}">
@@ -9,4 +9,7 @@
 <meta name="twitter:description" content="{{#if og.description}}{{og.description}}{{else}}{{site.description}}{{/if}}">
 <meta name="twitter:image" content="{{site.url}}{{#if og.image}}{{asset og.image}}{{else}}{{asset "/assets/images/og-image.png"}}{{/if}}">
 <meta name="description" content="{{#if og.description}}{{og.description}}{{else}}{{site.description}}{{/if}}">
+<meta itemprop="name" content="{{#if og.title}}{{og.title}}{{else}}{{site.name}}{{/if}}">
+<meta itemprop="description" content="{{#if og.description}}{{og.description}}{{else}}{{site.description}}{{/if}}">
+<meta itemprop="image" content="{{site.url}}{{#if og.image}}{{asset og.image}}{{else}}{{asset "/assets/images/og-image.png"}}{{/if}}">
 <link rel="canonical" href="{{#if og.url}}{{og.url}}{{else}}{{site.url}}{{/if}}">
