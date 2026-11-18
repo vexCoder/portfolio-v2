@@ -102,3 +102,25 @@ export interface PortfolioData {
   benchmarks: BenchmarkEntry[];
   skills: Skills;
 }
+
+// Private apps access (access.json, runtime-managed on the VPS).
+// Only sha256 hashes of invite keys and session tokens are stored.
+export interface AccessInvite {
+  hash: string;
+  name: string;
+  createdAt: string;
+  usedAt?: string;
+  revokedAt?: string;
+}
+
+export interface AccessSession {
+  hash: string;
+  name: string;
+  createdAt: string;
+  revokedAt?: string;
+}
+
+export interface AccessData {
+  invites: AccessInvite[];
+  sessions: AccessSession[];
+}

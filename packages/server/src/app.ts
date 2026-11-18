@@ -20,6 +20,7 @@ import {
   getLastUpdated,
 } from "./data/index.js";
 import { prefetchOgData, getOgData } from "./utils/og-fetcher.js";
+import { mountPrivateApps } from "./access/routes.js";
 import type { Request } from "express";
 
 function getClientIp(req: Request): string {
@@ -94,6 +95,10 @@ app.engine(
 );
 app.set("view engine", "hbs");
 app.set("views", path.join(templatesDir, "views"));
+
+// Private apps (/invite and /__apps) — before static files so the gate and
+// no-store headers always apply there
+mountPrivateApps(app);
 
 // Static files
 const staticOpts = { etag: true, lastModified: true, maxAge: isProd ? "7d" : 0 };

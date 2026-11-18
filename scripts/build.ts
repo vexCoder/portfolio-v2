@@ -44,6 +44,18 @@ async function buildArtifacts() {
     },
   });
 
+  // 2b. Bundle the invite command (runs on the VPS as `node invite.js ...`)
+  console.log("→ Bundling invite command");
+  await build({
+    entryPoints: [resolve(server, "src/access/cli.ts")],
+    bundle: true,
+    define: { "process.env.NODE_ENV": '"production"' },
+    platform: "node",
+    target: "node18",
+    format: "esm",
+    outfile: resolve(artifacts, "invite.js"),
+  });
+
   // 3. Copy templates
   console.log("→ Copying templates");
   cpSync(
@@ -71,7 +83,8 @@ async function buildArtifacts() {
   console.log("→ Copying data files");
   mkdirSync(resolve(artifacts, "data"), { recursive: true });
   const dataDir = resolve(server, "src/data");
-  const skipData = new Set(["analytics.json", "interactions.json", "deploy.json", "viewlog.json"]);
+  // access.json holds invites and sessions for /__apps; never ship it, never overwrite it.
+  const skipData = new Set(["analytics.json", "interactions.json", "deploy.json", "viewlog.json", "access.json"]);
   for (const f of readdirSync(dataDir).filter(f => f.endsWith(".json"))) {
     if (skipData.has(f)) continue;
     cpSync(resolve(dataDir, f), resolve(artifacts, "data", f));

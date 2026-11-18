@@ -37,6 +37,8 @@ jobs:
           target: ~/git/portfolio
           strip_components: 1
           overwrite: true
+          # Keep rm off: apps/ and data/access.json live only on the VPS
+          # and must survive deploys.
 
       - name: Restart
         uses: appleboy/ssh-action@v1.2.1

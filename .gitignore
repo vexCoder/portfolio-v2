@@ -9,5 +9,9 @@ packages/frontend/dist/
 .env
 .env.local
 
+# Private apps (local test folders) and their invite/session file
+/apps/
+packages/server/src/data/access.json
+
 # Artifacts
 artifacts

@@ -64,6 +64,8 @@ When adding new content types: add interface to `schema/types.ts` → create JSO
 |------|------|------|
 | `/` | home.hbs | site config, featured projects, OG meta |
 | `/about` | about.hbs | site config, OG meta |
+| `/invite/:key` | inline HTML | GET shows Continue, POST uses the invite (`src/access/`) |
+| `/__apps/...` | static from `apps/` | gated by session cookie, see README "Private Apps" |
 
 ## Adding a New Page
 

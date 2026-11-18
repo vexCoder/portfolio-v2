@@ -1,6 +1,11 @@
 packages:
   - packages/*
 
+# pnpm 11 reads allowBuilds, pnpm 10 reads onlyBuiltDependencies. Keep both.
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild

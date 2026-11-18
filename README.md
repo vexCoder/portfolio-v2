@@ -81,6 +81,61 @@ pnpm run dev
 | `pnpm run build:css` | Tailwind only |
 | `pnpm run build:server` | TypeScript only |
 
+## Private Apps
+
+`/__apps/` holds small private apps. Only people you invite can open them. Everyone else is sent to the portfolio at `/`.
+
+### Invite, list, revoke
+
+Run these on your PC. They SSH into the VPS with the `VPS_*` settings in `.env`.
+
+| Command | What it does |
+|---------|--------------|
+| `pnpm invite maria` | Prints a one-time link for maria. Send it to her. |
+| `pnpm invite list` | Shows everyone: `active` (has a device), `invited` (link not used yet), `revoked`. |
+| `pnpm invite revoke maria` | Kills maria's unused links and logs out all her devices. |
+
+How a link works:
+
+- Opening it shows a page with a Continue button. Opening alone does nothing, so chat link previews do not use it up.
+- Continue uses up the link and logs that browser in for 400 days.
+- The link is dead after that. A new phone or browser needs a new link.
+- After `revoke` you can invite the same name again.
+
+Add `--local` to test against your dev server instead: `pnpm invite maria --local`. Links then point at `http://localhost:3000`.
+
+On the VPS itself the same command is `cd ~/git/portfolio && node invite.js maria`.
+
+### Put an app on the VPS
+
+Each app is a folder in `~/git/portfolio/apps/` with an `index.html` inside. The folder name is the URL: `apps/notes/` → `https://ivangolosinda.com/__apps/notes/`.
+
+| Command | What it does |
+|---------|--------------|
+| `pnpm app:push <folder> <name>` | Copies `<folder>` to the VPS as `apps/<name>/`. Pushing again replaces the old version. |
+| `pnpm app:remove <name>` | Deletes `apps/<name>/` on the VPS. |
+
+- `<folder>` is a built app with an `index.html`: a plain HTML folder, or a Vite `dist/` folder.
+- `<name>` uses only letters, digits and dashes.
+- A React/Vite app must be built with its base path set to its URL first:
+  ```bash
+  vite build --base=/__apps/notes/
+  pnpm app:push path/to/notes/dist notes
+  ```
+  Paths without a file extension (like `/__apps/notes/settings`) get the app's `index.html`, so React Router works.
+- No restart needed. The app shows up on `/__apps/` right away.
+- Add `--local` to copy into `apps/` at the repo root instead, for testing with `pnpm run dev` (git ignores that folder).
+
+### Where things live
+
+| What | Where |
+|------|-------|
+| Invites and logins | `data/access.json` on the VPS. Only hashes are stored. Deploys never touch it. |
+| Apps | `apps/` on the VPS. Deploys never touch it. |
+| Code | `packages/server/src/access/` (store, routes, the `invite` command), `scripts/invite.ts`, `scripts/app.ts`, `scripts/vps.ts` (SSH helpers) |
+
+Everything under `/__apps` and `/invite` is sent with `Cache-Control: private, no-store`, so Cloudflare never caches private files.
+
 ## Deployment
 
 Push to `main` → GitHub Actions builds → SCP to VPS → pm2 restart. Fully automated after initial setup.
