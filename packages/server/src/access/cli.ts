@@ -1,6 +1,7 @@
 // The invite command. On the VPS it is bundled to ~/git/portfolio/invite.js:
 //
 //   node invite.js <name>          create a one-time invite link for <name>
+//   node invite.js <name> <app>    same, but the link lands on that app
 //   node invite.js list            everyone invited, and their state
 //   node invite.js revoke <name>   kill <name>'s open invites and sessions
 //
@@ -11,6 +12,7 @@ import path from "node:path";
 import { accessFile, createInvite, listPeople, revokePerson } from "./store.js";
 
 const NAME = /^[a-z0-9][a-z0-9._-]*$/;
+const APP = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 function fail(message: string): never {
   console.error(message);
@@ -73,7 +75,12 @@ if (command === "list") {
   }
 } else {
   const name = checkName(command);
+  // Optional app name: the link then lands on that app instead of the list.
+  if (arg && !APP.test(arg)) {
+    fail("App names use only letters, numbers, dot, dash and underscore.");
+  }
   const key = createInvite(name);
+  const where = arg ? `?app=${arg}` : "";
   console.log(`Invite for ${name} (works once, on one device):`);
-  console.log(`${siteUrl()}/invite/${key}`);
+  console.log(`${siteUrl()}/invite/${key}${where}`);
 }

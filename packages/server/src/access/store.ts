@@ -64,6 +64,12 @@ export function findOpenInvite(key: string): AccessInvite | undefined {
   return readAccess().invites.find((i) => i.hash === hash && !i.usedAt && !i.revokedAt);
 }
 
+/** True if this key belongs to an invite that was already used. Does not change anything. */
+export function wasInviteUsed(key: string): boolean {
+  const hash = hashSecret(key);
+  return readAccess().invites.some((i) => i.hash === hash && Boolean(i.usedAt));
+}
+
 /** Uses up an invite and starts a session. Returns the session token, or undefined if the key is no good. */
 export function redeemInvite(key: string): { name: string; token: string } | undefined {
   const hash = hashSecret(key);

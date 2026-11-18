@@ -3,6 +3,8 @@
 //   GET  /invite/:key   page with one Continue button (does NOT use up the invite,
 //                       because chat apps fetch links to build previews)
 //   POST /invite/:key   uses up the invite, sets the session cookie, goes to /__apps/
+//   Add ?app=<name> to an invite link to land on /__apps/<name>/ instead of the list.
+//   A link that was already used skips the button and goes straight there.
 //   /__apps/            list of app folders          (cookie required)
 //   /__apps/<name>/...  files from apps/<name>/, unknown paths fall back to index.html
 //
@@ -13,7 +15,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import type { Express, Request, Response, NextFunction } from "express";
-import { findOpenInvite, findSession, redeemInvite } from "./store.js";
+import { findOpenInvite, findSession, redeemInvite, wasInviteUsed } from "./store.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -138,13 +140,24 @@ function serveApps(req: Request, res: Response, next: NextFunction): void {
   });
 }
 
+/** Where an invite link lands: the app named in ?app=, or the list. */
+function landing(req: Request): string {
+  const name = req.query.app;
+  if (typeof name === "string" && APP_NAME.test(name)) {
+    return `${APPS_URL}/${name}/`;
+  }
+  return `${APPS_URL}/`;
+}
+
 export function mountPrivateApps(app: Express): void {
   app.use("/invite", privateHeaders);
 
   app.get("/invite/:key", (req, res) => {
     const invite = findOpenInvite(req.params.key);
     if (!invite) {
-      res.redirect(302, "/");
+      // An already used link goes straight to the app. The gate there still
+      // checks the cookie, so it only works on a device that is signed in.
+      res.redirect(302, wasInviteUsed(req.params.key) ? landing(req) : "/");
       return;
     }
     res.send(
@@ -170,7 +183,7 @@ export function mountPrivateApps(app: Express): void {
       path: APPS_URL,
       maxAge: COOKIE_MAX_AGE,
     });
-    res.redirect(303, `${APPS_URL}/`);
+    res.redirect(303, landing(req));
   });
 
   app.use(APPS_URL, privateHeaders, requireAccess, serveApps);

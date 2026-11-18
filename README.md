@@ -92,6 +92,7 @@ Run these on your PC. They SSH into the VPS with the `VPS_*` settings in `.env`.
 | Command | What it does |
 |---------|--------------|
 | `pnpm invite maria` | Prints a one-time link for maria. Send it to her. |
+| `pnpm invite maria notes` | Same, but the link lands on the `notes` app instead of the list. |
 | `pnpm invite list` | Shows everyone: `active` (has a device), `invited` (link not used yet), `revoked`. |
 | `pnpm invite revoke maria` | Kills maria's unused links and logs out all her devices. |
 
@@ -99,7 +100,9 @@ How a link works:
 
 - Opening it shows a page with a Continue button. Opening alone does nothing, so chat link previews do not use it up.
 - Continue uses up the link and logs that browser in for 400 days.
-- The link is dead after that. A new phone or browser needs a new link.
+- The link cannot log anyone in after that. A new phone or browser needs a new link.
+- On a browser that is already logged in, a used link skips the button and goes straight to the apps.
+- `?app=notes` at the end of a link picks where it lands: `/__apps/notes/` instead of the list. You can add or change it by hand.
 - After `revoke` you can invite the same name again.
 
 Add `--local` to test against your dev server instead: `pnpm invite maria --local`. Links then point at `http://localhost:3000`.

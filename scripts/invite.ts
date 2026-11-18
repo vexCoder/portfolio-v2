@@ -1,6 +1,7 @@
 // Run the invite command from your PC.
 //
 //   pnpm invite maria            create an invite link for maria (on the VPS)
+//   pnpm invite maria notes      same, but the link lands on the notes app
 //   pnpm invite list             list people and their state (on the VPS)
 //   pnpm invite revoke maria     revoke maria (on the VPS)
 //
