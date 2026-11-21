@@ -27,26 +27,46 @@ export const accessFile = path.join(dataDir, "access.json");
 // In dev: apps at <repo>/apps/
 export const appsDir = isProd ? path.resolve(__dirname, "apps") : path.resolve(__dirname, "../../../../apps");
 
-// An app's folder, and its URL, is its name plus 12 random characters:
-// apps/notes-k3f9x2m7qp4z/ -> /__apps/notes-k3f9x2m7qp4z/. Only folders shaped
-// like this are served, so nobody can find an app by guessing its name.
-// scripts/app.ts makes these folders; keep its pattern the same.
-export const APP_ID = /^[A-Za-z0-9][A-Za-z0-9-]*-[a-z0-9]{12}$/;
+// Each app has a random 12-character id, and its URL is only that id:
+// /__apps/k3f9x2m7qp4z/. The folder on disk puts the name in front so you can
+// tell apps apart there: apps/notes-k3f9x2m7qp4z/. The name never shows in a
+// URL, so nobody can find an app by guessing. Only folders shaped like this are
+// served. scripts/app.ts makes these folders; keep its pattern the same.
+export const APP_FOLDER = /^[A-Za-z0-9][A-Za-z0-9-]*-[a-z0-9]{12}$/;
+export const APP_ID = /^[a-z0-9]{12}$/;
 
-/** The folder of the app called `name` (or `name` itself if it is already an id), if it exists. */
-export function findAppId(name: string): string | undefined {
+function appFolders(): string[] {
   if (!fs.existsSync(appsDir)) {
-    return undefined;
+    return [];
   }
-  const folders = fs.readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory());
-  const match = folders.find((d) => d.name === name && APP_ID.test(d.name))
-    ?? folders.find((d) => APP_ID.test(d.name) && d.name.slice(0, -13) === name);
-  return match?.name;
+  return fs
+    .readdirSync(appsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && APP_FOLDER.test(d.name))
+    .map((d) => d.name);
 }
 
-/** The app name inside an app id: notes-k3f9x2m7qp4z -> notes. */
-export function appNameOf(id: string): string {
-  return id.slice(0, -13);
+/** The folder of the app called `name` (or with this id), if it exists. */
+export function findAppFolder(nameOrId: string): string | undefined {
+  const folders = appFolders();
+  return folders.find((f) => appNameOf(f) === nameOrId) ?? folders.find((f) => appIdOf(f) === nameOrId);
+}
+
+/** The folder for a URL id, if there is one. */
+export function folderForId(id: string): string | undefined {
+  if (!APP_ID.test(id)) {
+    return undefined;
+  }
+  return appFolders().find((f) => appIdOf(f) === id);
+}
+
+/** notes-k3f9x2m7qp4z -> notes */
+export function appNameOf(folder: string): string {
+  return folder.slice(0, -13);
+}
+
+/** notes-k3f9x2m7qp4z -> k3f9x2m7qp4z (the part in the URL) */
+export function appIdOf(folder: string): string {
+  return folder.slice(-12);
 }
 
 /** True if this session may open the app with this name. */

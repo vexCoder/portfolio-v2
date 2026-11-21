@@ -109,9 +109,9 @@ How a link works:
 - The link cannot log anyone in after that. A new phone or browser needs a new link.
 - On a browser that is already logged in, a used link skips the button and goes straight to the app.
 - A browser can hold several keys. Someone with a `notes` key who uses a `todo` key can open both.
-- `?app=notes-k3f9x2m7qp4z` at the end of a link is the app it opens.
+- `?app=k3f9x2m7qp4z` at the end of a link is the app it opens.
 - There is no list of apps. `/__apps/` sends everyone to the portfolio.
-- Each app's URL has a random part, so nobody finds an app by guessing. A key made with `--app` cannot open other apps even with their URL.
+- An app's URL is only a random id, never its name, so nobody finds an app by guessing. A key made with `--app` cannot open other apps even with their URL.
 - After `revoke` you can use the same label again.
 
 Add `--local` to test against your dev server instead: `pnpm key --app notes --local`. Links then point at `http://localhost:3000`.
@@ -120,7 +120,7 @@ On the VPS itself the same command is `cd ~/git/portfolio && node key.js --app n
 
 ### Put an app on the VPS
 
-Each app is a folder in `~/git/portfolio/apps/` with an `index.html` inside. The folder is the app's name plus 12 random characters, and that is its URL: `apps/notes-k3f9x2m7qp4z/` → `https://ivangolosinda.com/__apps/notes-k3f9x2m7qp4z/`. You only ever type the name. The commands look up the rest.
+Each app is a folder in `~/git/portfolio/apps/` with an `index.html` inside. The folder is the app's name plus a random 12-character id, and the URL is only the id: `apps/notes-k3f9x2m7qp4z/` → `https://ivangolosinda.com/__apps/k3f9x2m7qp4z/`. You only ever type the name. The commands look up the id.
 
 | Command | What it does |
 |---------|--------------|
@@ -132,11 +132,11 @@ Each app is a folder in `~/git/portfolio/apps/` with an `index.html` inside. The
 - `<name>` uses only letters, digits and dashes.
 - A React/Vite app must be built with its base path set to its URL first:
   ```bash
-  pnpm app:url notes        # prints https://ivangolosinda.com/__apps/notes-k3f9x2m7qp4z/
-  vite build --base=/__apps/notes-k3f9x2m7qp4z/
+  pnpm app:url notes        # prints https://ivangolosinda.com/__apps/k3f9x2m7qp4z/
+  vite build --base=/__apps/k3f9x2m7qp4z/
   pnpm app:push path/to/notes/dist notes
   ```
-  Paths without a file extension (like `/__apps/notes-k3f9x2m7qp4z/settings`) get the app's `index.html`, so React Router works.
+  Paths without a file extension (like `/__apps/k3f9x2m7qp4z/settings`) get the app's `index.html`, so React Router works.
 - No restart needed. The app is live right away.
 - Folders without the random part are never served.
 - Add `--local` to copy into `apps/` at the repo root instead, for testing with `pnpm run dev` (git ignores that folder).

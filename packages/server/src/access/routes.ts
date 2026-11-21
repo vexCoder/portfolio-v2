@@ -6,9 +6,10 @@
 //   ?app=<id> on an invite link says which app it opens: /__apps/<id>/.
 //   A link that was already used skips the button and goes straight there.
 //   /__apps/            no list on purpose, so people only see the apps they are sent to
-//   /__apps/<id>/...    files from apps/<id>/, unknown paths fall back to index.html
+//   /__apps/<id>/...    files from apps/<name>-<id>/, unknown paths fall back to index.html
 //
-// An app id is its name plus 12 random characters (see APP_ID in store.ts).
+// An app id is 12 random characters (see APP_ID in store.ts). The URL has only
+// the id; the app's name is only in the folder name on disk.
 // Anyone without a valid cookie is sent to the portfolio at /.
 
 import path from "node:path";
@@ -22,6 +23,7 @@ import {
   appsDir,
   findOpenInvite,
   findSessions,
+  folderForId,
   redeemInvite,
   sessionAllows,
   wasInviteUsed,
@@ -108,7 +110,18 @@ function requireAccess(req: Request, res: Response, next: NextFunction): void {
   next();
 }
 
-const serveAppFiles = express.static(appsDir, { cacheControl: false, redirect: true });
+// One static server per app folder, rooted inside that folder, so a ".." in the
+// path can never reach another app's files (the --app check is per app).
+const staticByFolder = new Map<string, ReturnType<typeof express.static>>();
+
+function serveAppFiles(folder: string): ReturnType<typeof express.static> {
+  let serve = staticByFolder.get(folder);
+  if (!serve) {
+    serve = express.static(path.join(appsDir, folder), { cacheControl: false, redirect: true });
+    staticByFolder.set(folder, serve);
+  }
+  return serve;
+}
 
 function serveApps(req: Request, res: Response, next: NextFunction): void {
   const parts = req.path.split("/").filter(Boolean);
@@ -119,23 +132,35 @@ function serveApps(req: Request, res: Response, next: NextFunction): void {
     return;
   }
 
-  const name = parts[0];
-  const appDir = path.join(appsDir, name);
-  if (!APP_ID.test(name) || !fs.existsSync(path.join(appDir, "index.html"))) {
+  const id = parts[0];
+  const folder = folderForId(id);
+  if (!folder || !fs.existsSync(path.join(appsDir, folder, "index.html"))) {
     next();
     return;
   }
+  const appDir = path.join(appsDir, folder);
 
   // A key made with --app only opens those apps.
   const sessions = res.locals.sessions as AccessSession[];
-  if (!sessions.some((s) => sessionAllows(s, appNameOf(name)))) {
+  if (!sessions.some((s) => sessionAllows(s, appNameOf(folder)))) {
     res.redirect(302, "/");
     return;
   }
 
+  // /__apps/<id> -> /__apps/<id>/ so the app's relative links resolve inside it.
+  const [pathOnly, query] = req.originalUrl.split("?");
+  if (parts.length === 1 && !pathOnly.endsWith("/")) {
+    res.redirect(301, `${pathOnly}/${query === undefined ? "" : `?${query}`}`);
+    return;
+  }
+
+  // The URL has only the id; the files sit in the <name>-<id> folder.
+  // Strip the id, so the folder's own static server sees a path inside it.
+  req.url = req.url.slice(id.length + 1) || "/";
+
   // Real files first. If none matched and the last part has no file extension,
   // it is a page route of the app (React router etc.), so send its index.html.
-  serveAppFiles(req, res, () => {
+  serveAppFiles(folder)(req, res, () => {
     const last = parts[parts.length - 1];
     if (parts.length > 1 && last.includes(".")) {
       next();

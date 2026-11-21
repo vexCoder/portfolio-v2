@@ -5,7 +5,7 @@
 //   pnpm app:remove <name>          delete app <name> from the VPS
 //
 // Each app lives in ~/git/portfolio/apps/<name>-<12 random characters>/, and
-// that folder name is its URL: /__apps/notes-k3f9x2m7qp4z/. The random part is
+// its URL is only the random part: /__apps/k3f9x2m7qp4z/. The random part is
 // made on the first push or app:url and kept after that, so links keep working.
 //
 // <folder> is a built app: a Vite dist/ folder or a plain HTML folder with
@@ -81,8 +81,9 @@ function siteUrl(): string {
   return site.url.replace(/\/+$/, "");
 }
 
-function appUrl(id: string): string {
-  return `${siteUrl()}/__apps/${id}/`;
+/** The URL has only the random part of the folder name: notes-k3f9x2m7qp4z -> /__apps/k3f9x2m7qp4z/ */
+function appUrl(folder: string): string {
+  return `${siteUrl()}/__apps/${folder.slice(-ID_LENGTH)}/`;
 }
 
 if (command === "push") {

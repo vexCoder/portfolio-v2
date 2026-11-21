@@ -15,7 +15,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { accessFile, appNameOf, createInvite, findAppId, labelTaken, listPeople, revokePerson } from "./store.js";
+import {
+  accessFile,
+  appIdOf,
+  appNameOf,
+  createInvite,
+  findAppFolder,
+  labelTaken,
+  listPeople,
+  revokePerson,
+} from "./store.js";
 
 const LABEL = /^[a-z0-9][a-z0-9._-]*$/;
 const APP = /^[A-Za-z0-9][A-Za-z0-9-]*$/;
@@ -56,16 +65,16 @@ function randomLabel(): string {
   }
 }
 
-/** The app's id, or a clear error if there is no such app. */
-function appId(name: string): string {
+/** The app's folder (<name>-<id>), or a clear error if there is no such app. */
+function appFolder(name: string): string {
   if (!APP.test(name)) {
     fail(`Not an app name: ${name}`);
   }
-  const id = findAppId(name);
-  if (!id) {
+  const folder = findAppFolder(name);
+  if (!folder) {
     fail(`No app called ${name}. Put it up first with: pnpm app:push <folder> ${name}`);
   }
-  return id;
+  return folder;
 }
 
 function day(iso: string): string {
@@ -127,15 +136,15 @@ function create(args: string[]): void {
 
   // --app: the only apps this key opens. No --app: every app.
   // Stored as plain names (notes, not notes-k3f9...), so a re-pushed app still matches.
-  const apps = flags.get("--app")?.split(",").filter(Boolean).map((a) => appNameOf(appId(a)));
+  const apps = flags.get("--app")?.split(",").filter(Boolean).map((a) => appNameOf(appFolder(a)));
 
   // --redirect: where the link opens. Default: the first --app, else the portfolio.
   const redirectArg = flags.get("--redirect");
-  const redirect = redirectArg ? appNameOf(appId(redirectArg)) : apps?.[0];
+  const redirect = redirectArg ? appNameOf(appFolder(redirectArg)) : apps?.[0];
   if (redirect && apps && !apps.includes(redirect)) {
     fail(`--redirect ${redirect} is not one of the --app apps, so the key could not open it.`);
   }
-  const query = redirect ? `?app=${appId(redirect)}` : "";
+  const query = redirect ? `?app=${appIdOf(appFolder(redirect))}` : "";
 
   const scope = apps ? apps.join(", ") : "every app";
   const opens = redirect ? `, opens ${redirect}` : "";
