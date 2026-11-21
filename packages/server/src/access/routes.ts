@@ -16,7 +16,7 @@ import path from "node:path";
 import fs from "node:fs";
 import express from "express";
 import type { Express, Request, Response, NextFunction } from "express";
-import type { AccessSession } from "../schema/types.js";
+import type { AccessInvite, AccessSession } from "../schema/types.js";
 import {
   APP_ID,
   appNameOf,
@@ -96,17 +96,48 @@ function cookieTokens(req: Request): string[] {
 }
 
 /**
+ * Writes the browser's keys into one cookie on Path=/. With dropOld, also
+ * removes a cookie from before that change (Path=/__apps). Only do that where
+ * the old cookie was sent too (under /__apps), or its keys would be lost.
+ */
+function setSessionCookie(res: Response, tokens: string[], dropOld = false): void {
+  if (dropOld) {
+    res.clearCookie(COOKIE, { path: APPS_URL });
+  }
+  res.cookie(COOKIE, [...new Set(tokens)].join("."), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: isProd,
+    path: COOKIE_PATH,
+    maxAge: COOKIE_MAX_AGE,
+  });
+}
+
+/** True if these sessions already open everything this invite would give. */
+function alreadyCovered(sessions: AccessSession[], invite: AccessInvite): boolean {
+  if (!invite.apps) {
+    return sessions.some((s) => !s.apps);
+  }
+  return invite.apps.every((app) => sessions.some((s) => sessionAllows(s, app)));
+}
+
+/**
  * The first half of the access check for everything under APPS_URL:
  * at least one live session in the cookie, or off to the portfolio.
  * serveApps does the second half, whether one of them allows this app.
  */
 function requireAccess(req: Request, res: Response, next: NextFunction): void {
-  const sessions = findSessions(cookieTokens(req)).map((s) => s.session);
-  if (sessions.length === 0) {
+  const live = findSessions(cookieTokens(req));
+  if (live.length === 0) {
     res.redirect(302, "/");
     return;
   }
-  res.locals.sessions = sessions;
+  // Moves cookies from before the Path=/ change (and drops revoked keys), so the
+  // invite page can see this browser's keys too. Pages only, not every file.
+  if (req.accepts("html") && !path.extname(req.path)) {
+    setSessionCookie(res, live.map((s) => s.token), true);
+  }
+  res.locals.sessions = live.map((s) => s.session);
   next();
 }
 
@@ -190,6 +221,13 @@ export function mountPrivateApps(app: Express): void {
       res.redirect(302, wasInviteUsed(req.params.key) ? landing(req) : "/");
       return;
     }
+    // A browser that can already open everything this key gives goes straight
+    // to the app, and the link stays unused for the person it is meant for.
+    const sessions = findSessions(cookieTokens(req)).map((s) => s.session);
+    if (alreadyCovered(sessions, invite)) {
+      res.redirect(302, landing(req));
+      return;
+    }
     const hi = invite.autoName ? "" : `Hi ${escapeHtml(invite.name)}. `;
     res.send(
       page(
@@ -202,22 +240,20 @@ export function mountPrivateApps(app: Express): void {
   });
 
   app.post("/invite/:key", (req, res) => {
+    const invite = findOpenInvite(req.params.key);
+    const live = findSessions(cookieTokens(req));
+    // Same check as the GET, in case the page was open while access changed.
+    if (invite && alreadyCovered(live.map((s) => s.session), invite)) {
+      res.redirect(303, landing(req));
+      return;
+    }
     const result = redeemInvite(req.params.key);
     if (!result) {
       res.redirect(302, "/");
       return;
     }
     // Keep the keys this browser already has, and add the new one.
-    // An old Path=/__apps cookie never reaches /invite, so it is left alone;
-    // the gate reads it next to this one.
-    const kept = findSessions(cookieTokens(req)).map((s) => s.token);
-    res.cookie(COOKIE, [...kept, result.token].join("."), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: isProd,
-      path: COOKIE_PATH,
-      maxAge: COOKIE_MAX_AGE,
-    });
+    setSessionCookie(res, [...live.map((s) => s.token), result.token]);
     res.redirect(303, landing(req));
   });
 
