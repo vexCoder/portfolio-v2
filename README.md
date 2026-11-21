@@ -83,50 +83,62 @@ pnpm run dev
 
 ## Private Apps
 
-`/__apps/` holds small private apps. Only people you invite can open them. Everyone else is sent to the portfolio at `/`.
+`/__apps/` holds small private apps. Only people you give a key can open them. Everyone else is sent to the portfolio at `/`.
 
-### Invite, list, revoke
+### Keys
 
-Run these on your PC. They SSH into the VPS with the `VPS_*` settings in `.env`.
+A key is a one-time link. Run these on your PC. They SSH into the VPS with the `VPS_*` settings in `.env`.
 
 | Command | What it does |
 |---------|--------------|
-| `pnpm invite maria` | Prints a one-time link for maria. Send it to her. |
-| `pnpm invite maria notes` | Same, but the link lands on the `notes` app instead of the list. |
-| `pnpm invite list` | Shows everyone: `active` (has a device), `invited` (link not used yet), `revoked`. |
-| `pnpm invite revoke maria` | Kills maria's unused links and logs out all her devices. |
+| `pnpm key` | One link that opens every app. It lands on the portfolio. |
+| `pnpm key --count 3` | Three links. Each gets its own random label, like `k7f2`. |
+| `pnpm key --name maria` | Labels the key `maria` instead of a random label. The Continue page then says "Hi maria". |
+| `pnpm key --app notes` | A key for `notes` only. The link opens `notes`. |
+| `pnpm key --app notes,todo` | A key for `notes` and `todo` only. The link opens `notes`. |
+| `pnpm key --redirect notes` | A key for every app. The link opens `notes`. |
+| `pnpm key list` | Every label: `active` (a browser is logged in), `invited` (link not used yet), `revoked`, and which apps it opens. |
+| `pnpm key revoke maria` | Kills that label's unused links and logs out its browsers. |
+
+Mix them as you like: `pnpm key --count 3 --app notes,todo --redirect todo`. With `--app`, `--redirect` must be one of those apps.
 
 How a link works:
 
 - Opening it shows a page with a Continue button. Opening alone does nothing, so chat link previews do not use it up.
 - Continue uses up the link and logs that browser in for 400 days.
 - The link cannot log anyone in after that. A new phone or browser needs a new link.
-- On a browser that is already logged in, a used link skips the button and goes straight to the apps.
-- `?app=notes` at the end of a link picks where it lands: `/__apps/notes/` instead of the list. You can add or change it by hand.
-- After `revoke` you can invite the same name again.
+- On a browser that is already logged in, a used link skips the button and goes straight to the app.
+- A browser can hold several keys. Someone with a `notes` key who uses a `todo` key can open both.
+- `?app=notes-k3f9x2m7qp4z` at the end of a link is the app it opens.
+- There is no list of apps. `/__apps/` sends everyone to the portfolio.
+- Each app's URL has a random part, so nobody finds an app by guessing. A key made with `--app` cannot open other apps even with their URL.
+- After `revoke` you can use the same label again.
 
-Add `--local` to test against your dev server instead: `pnpm invite maria --local`. Links then point at `http://localhost:3000`.
+Add `--local` to test against your dev server instead: `pnpm key --app notes --local`. Links then point at `http://localhost:3000`.
 
-On the VPS itself the same command is `cd ~/git/portfolio && node invite.js maria`.
+On the VPS itself the same command is `cd ~/git/portfolio && node key.js --app notes`.
 
 ### Put an app on the VPS
 
-Each app is a folder in `~/git/portfolio/apps/` with an `index.html` inside. The folder name is the URL: `apps/notes/` → `https://ivangolosinda.com/__apps/notes/`.
+Each app is a folder in `~/git/portfolio/apps/` with an `index.html` inside. The folder is the app's name plus 12 random characters, and that is its URL: `apps/notes-k3f9x2m7qp4z/` → `https://ivangolosinda.com/__apps/notes-k3f9x2m7qp4z/`. You only ever type the name. The commands look up the rest.
 
 | Command | What it does |
 |---------|--------------|
-| `pnpm app:push <folder> <name>` | Copies `<folder>` to the VPS as `apps/<name>/`. Pushing again replaces the old version. |
-| `pnpm app:remove <name>` | Deletes `apps/<name>/` on the VPS. |
+| `pnpm app:push <folder> <name>` | Copies `<folder>` to the VPS as app `<name>` and prints its URL. Pushing again replaces the old version and keeps the URL. |
+| `pnpm app:url <name>` | Prints the app's URL. For a new app it makes the URL now, so you can build with it before the first push. |
+| `pnpm app:remove <name>` | Deletes the app from the VPS. Pushing it again later gives it a new URL. |
 
 - `<folder>` is a built app with an `index.html`: a plain HTML folder, or a Vite `dist/` folder.
 - `<name>` uses only letters, digits and dashes.
 - A React/Vite app must be built with its base path set to its URL first:
   ```bash
-  vite build --base=/__apps/notes/
+  pnpm app:url notes        # prints https://ivangolosinda.com/__apps/notes-k3f9x2m7qp4z/
+  vite build --base=/__apps/notes-k3f9x2m7qp4z/
   pnpm app:push path/to/notes/dist notes
   ```
-  Paths without a file extension (like `/__apps/notes/settings`) get the app's `index.html`, so React Router works.
-- No restart needed. The app shows up on `/__apps/` right away.
+  Paths without a file extension (like `/__apps/notes-k3f9x2m7qp4z/settings`) get the app's `index.html`, so React Router works.
+- No restart needed. The app is live right away.
+- Folders without the random part are never served.
 - Add `--local` to copy into `apps/` at the repo root instead, for testing with `pnpm run dev` (git ignores that folder).
 
 ### Where things live
@@ -135,7 +147,7 @@ Each app is a folder in `~/git/portfolio/apps/` with an `index.html` inside. The
 |------|-------|
 | Invites and logins | `data/access.json` on the VPS. Only hashes are stored. Deploys never touch it. |
 | Apps | `apps/` on the VPS. Deploys never touch it. |
-| Code | `packages/server/src/access/` (store, routes, the `invite` command), `scripts/invite.ts`, `scripts/app.ts`, `scripts/vps.ts` (SSH helpers) |
+| Code | `packages/server/src/access/` (store, routes, the `key` command), `scripts/key.ts`, `scripts/app.ts`, `scripts/vps.ts` (SSH helpers) |
 
 Everything under `/__apps` and `/invite` is sent with `Cache-Control: private, no-store`, so Cloudflare never caches private files.
 

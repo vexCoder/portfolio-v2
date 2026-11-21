@@ -2,51 +2,61 @@
 //
 //   GET  /invite/:key   page with one Continue button (does NOT use up the invite,
 //                       because chat apps fetch links to build previews)
-//   POST /invite/:key   uses up the invite, sets the session cookie, goes to /__apps/
-//   Add ?app=<name> to an invite link to land on /__apps/<name>/ instead of the list.
+//   POST /invite/:key   uses up the invite, sets the session cookie, goes to the app
+//   ?app=<id> on an invite link says which app it opens: /__apps/<id>/.
 //   A link that was already used skips the button and goes straight there.
-//   /__apps/            list of app folders          (cookie required)
-//   /__apps/<name>/...  files from apps/<name>/, unknown paths fall back to index.html
+//   /__apps/            no list on purpose, so people only see the apps they are sent to
+//   /__apps/<id>/...    files from apps/<id>/, unknown paths fall back to index.html
 //
+// An app id is its name plus 12 random characters (see APP_ID in store.ts).
 // Anyone without a valid cookie is sent to the portfolio at /.
 
 import path from "node:path";
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
 import express from "express";
 import type { Express, Request, Response, NextFunction } from "express";
-import { findOpenInvite, findSession, redeemInvite, wasInviteUsed } from "./store.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import type { AccessSession } from "../schema/types.js";
+import {
+  APP_ID,
+  appNameOf,
+  appsDir,
+  findOpenInvite,
+  findSessions,
+  redeemInvite,
+  sessionAllows,
+  wasInviteUsed,
+} from "./store.js";
 
 const isProd = process.env.NODE_ENV === "production";
-// In bundle: __dirname = artifacts/ (~/git/portfolio on the VPS), apps at ~/git/portfolio/apps/
-// In dev: __dirname = packages/server/src/access/, apps at <repo>/apps/
-const appsDir = isProd ? path.resolve(__dirname, "apps") : path.resolve(__dirname, "../../../../apps");
 
 // The URL is deliberately not the obvious /apps. The folder on disk is still apps/.
 const APPS_URL = "/__apps";
 
 const COOKIE = "apps_session";
 const COOKIE_MAX_AGE = 400 * 24 * 60 * 60 * 1000; // 400 days, the most browsers allow
-const APP_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
-function readCookie(req: Request, name: string): string | undefined {
+// The cookie is on Path=/ so the invite page can see which keys a browser
+// already has. Cookies from before that change sat on Path=/__apps; a browser
+// may send both, so every cookie with this name is read.
+const COOKIE_PATH = "/";
+
+/** Every value sent for this cookie name (two cookies can share a name on different paths). */
+function readCookies(req: Request, name: string): string[] {
   const header = req.headers.cookie;
   if (!header) {
-    return undefined;
+    return [];
   }
+  const values: string[] = [];
   for (const part of header.split(";")) {
     const eq = part.indexOf("=");
     if (eq === -1) {
       continue;
     }
     if (part.slice(0, eq).trim() === name) {
-      return part.slice(eq + 1).trim();
+      values.push(part.slice(eq + 1).trim());
     }
   }
-  return undefined;
+  return values;
 }
 
 function escapeHtml(text: string): string {
@@ -76,30 +86,26 @@ function privateHeaders(_req: Request, res: Response, next: NextFunction): void 
   next();
 }
 
+// One browser can hold several keys (say one for notes, one for todo), so the
+// cookie is a list of session tokens joined by "." (base64url never uses ".").
+function cookieTokens(req: Request): string[] {
+  const tokens = readCookies(req, COOKIE).flatMap((value) => value.split(".")).filter(Boolean);
+  return [...new Set(tokens)].slice(0, 20);
+}
+
 /**
- * The one access check for everything under APPS_URL.
- * A valid session cookie passes; anything else goes to the portfolio.
+ * The first half of the access check for everything under APPS_URL:
+ * at least one live session in the cookie, or off to the portfolio.
+ * serveApps does the second half, whether one of them allows this app.
  */
 function requireAccess(req: Request, res: Response, next: NextFunction): void {
-  const token = readCookie(req, COOKIE);
-  const session = token ? findSession(token) : undefined;
-  if (!session) {
+  const sessions = findSessions(cookieTokens(req)).map((s) => s.session);
+  if (sessions.length === 0) {
     res.redirect(302, "/");
     return;
   }
-  res.locals.person = session.name;
+  res.locals.sessions = sessions;
   next();
-}
-
-function listApps(): string[] {
-  if (!fs.existsSync(appsDir)) {
-    return [];
-  }
-  return fs
-    .readdirSync(appsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && APP_NAME.test(d.name))
-    .map((d) => d.name)
-    .sort();
 }
 
 const serveAppFiles = express.static(appsDir, { cacheControl: false, redirect: true });
@@ -107,24 +113,23 @@ const serveAppFiles = express.static(appsDir, { cacheControl: false, redirect: t
 function serveApps(req: Request, res: Response, next: NextFunction): void {
   const parts = req.path.split("/").filter(Boolean);
 
-  // APPS_URL/ — the list
+  // APPS_URL/ itself has no list, so nobody sees which other apps exist.
   if (parts.length === 0) {
-    if (!req.originalUrl.split("?")[0].endsWith("/")) {
-      res.redirect(301, `${APPS_URL}/`);
-      return;
-    }
-    const names = listApps();
-    const items = names.length
-      ? `<ul>${names.map((n) => `<li><a href="${APPS_URL}/${escapeHtml(n)}/">${escapeHtml(n)}</a></li>`).join("")}</ul>`
-      : "<p>No apps yet.</p>";
-    res.send(page("Apps", `<h1>Apps</h1><p>Hi ${escapeHtml(String(res.locals.person))}.</p>${items}`));
+    res.redirect(302, "/");
     return;
   }
 
   const name = parts[0];
   const appDir = path.join(appsDir, name);
-  if (!APP_NAME.test(name) || !fs.existsSync(path.join(appDir, "index.html"))) {
+  if (!APP_ID.test(name) || !fs.existsSync(path.join(appDir, "index.html"))) {
     next();
+    return;
+  }
+
+  // A key made with --app only opens those apps.
+  const sessions = res.locals.sessions as AccessSession[];
+  if (!sessions.some((s) => sessionAllows(s, appNameOf(name)))) {
+    res.redirect(302, "/");
     return;
   }
 
@@ -140,13 +145,13 @@ function serveApps(req: Request, res: Response, next: NextFunction): void {
   });
 }
 
-/** Where an invite link lands: the app named in ?app=, or the list. */
+/** Where an invite link lands: the app named in ?app=, or the portfolio if none. */
 function landing(req: Request): string {
   const name = req.query.app;
-  if (typeof name === "string" && APP_NAME.test(name)) {
+  if (typeof name === "string" && APP_ID.test(name)) {
     return `${APPS_URL}/${name}/`;
   }
-  return `${APPS_URL}/`;
+  return "/";
 }
 
 export function mountPrivateApps(app: Express): void {
@@ -160,10 +165,11 @@ export function mountPrivateApps(app: Express): void {
       res.redirect(302, wasInviteUsed(req.params.key) ? landing(req) : "/");
       return;
     }
+    const hi = invite.autoName ? "" : `Hi ${escapeHtml(invite.name)}. `;
     res.send(
       page(
         "Invite",
-        `<p>Hi ${escapeHtml(invite.name)}. Ivan invited you to his private apps.</p>
+        `<p>${hi}Ivan invited you to his private apps.</p>
 <p>This link works once, on this device.</p>
 <form method="post"><button type="submit">Continue</button></form>`,
       ),
@@ -176,11 +182,15 @@ export function mountPrivateApps(app: Express): void {
       res.redirect(302, "/");
       return;
     }
-    res.cookie(COOKIE, result.token, {
+    // Keep the keys this browser already has, and add the new one.
+    // An old Path=/__apps cookie never reaches /invite, so it is left alone;
+    // the gate reads it next to this one.
+    const kept = findSessions(cookieTokens(req)).map((s) => s.token);
+    res.cookie(COOKIE, [...kept, result.token].join("."), {
       httpOnly: true,
       sameSite: "lax",
       secure: isProd,
-      path: APPS_URL,
+      path: COOKIE_PATH,
       maxAge: COOKIE_MAX_AGE,
     });
     res.redirect(303, landing(req));

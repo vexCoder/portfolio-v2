@@ -58,15 +58,32 @@ function run(cmd: string, args: string[], options: SpawnSyncOptions = {}): void 
   }
 }
 
-/** Runs a shell command on the VPS, with nvm loaded so `node` is found. */
-export function ssh(command: string): void {
+function sshArgs(command: string): string[] {
   requireVps();
   const remote = [
     'export NVM_DIR="$HOME/.nvm"',
     '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"',
     command,
   ].join("; ");
-  run("ssh", ["-p", port, "-i", keyPath!, "-o", "StrictHostKeyChecking=accept-new", `${user}@${host}`, remote]);
+  return ["-p", port, "-i", keyPath!, "-o", "StrictHostKeyChecking=accept-new", `${user}@${host}`, remote];
+}
+
+/** Runs a shell command on the VPS, with nvm loaded so `node` is found. */
+export function ssh(command: string): void {
+  run("ssh", sshArgs(command));
+}
+
+/** Same as ssh(), but returns what the command printed instead of showing it. */
+export function sshOutput(command: string): string {
+  const result = spawnSync("ssh", sshArgs(command), { encoding: "utf-8", stdio: ["ignore", "pipe", "inherit"] });
+  if (result.error) {
+    console.error(`Could not run ssh: ${result.error.message}`);
+    process.exit(1);
+  }
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+  return result.stdout;
 }
 
 /**

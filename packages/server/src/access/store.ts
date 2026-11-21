@@ -23,6 +23,37 @@ const dataDir = isProd ? path.resolve(__dirname, "data") : path.resolve(__dirnam
 
 export const accessFile = path.join(dataDir, "access.json");
 
+// In bundle: apps at artifacts/apps/ (~/git/portfolio/apps on the VPS)
+// In dev: apps at <repo>/apps/
+export const appsDir = isProd ? path.resolve(__dirname, "apps") : path.resolve(__dirname, "../../../../apps");
+
+// An app's folder, and its URL, is its name plus 12 random characters:
+// apps/notes-k3f9x2m7qp4z/ -> /__apps/notes-k3f9x2m7qp4z/. Only folders shaped
+// like this are served, so nobody can find an app by guessing its name.
+// scripts/app.ts makes these folders; keep its pattern the same.
+export const APP_ID = /^[A-Za-z0-9][A-Za-z0-9-]*-[a-z0-9]{12}$/;
+
+/** The folder of the app called `name` (or `name` itself if it is already an id), if it exists. */
+export function findAppId(name: string): string | undefined {
+  if (!fs.existsSync(appsDir)) {
+    return undefined;
+  }
+  const folders = fs.readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory());
+  const match = folders.find((d) => d.name === name && APP_ID.test(d.name))
+    ?? folders.find((d) => APP_ID.test(d.name) && d.name.slice(0, -13) === name);
+  return match?.name;
+}
+
+/** The app name inside an app id: notes-k3f9x2m7qp4z -> notes. */
+export function appNameOf(id: string): string {
+  return id.slice(0, -13);
+}
+
+/** True if this session may open the app with this name. */
+export function sessionAllows(session: AccessSession, appName: string): boolean {
+  return !session.apps || session.apps.includes(appName);
+}
+
 export function hashSecret(secret: string): string {
   return crypto.createHash("sha256").update(secret).digest("hex");
 }
@@ -49,11 +80,26 @@ function writeAccess(data: AccessData): void {
   fs.renameSync(tmp, accessFile);
 }
 
-/** Creates an invite for a person. Returns the secret key (shown once, never stored). */
-export function createInvite(name: string): string {
+/** True if any invite already uses this label. */
+export function labelTaken(name: string): boolean {
+  return readAccess().invites.some((i) => i.name === name);
+}
+
+/**
+ * Creates an invite. Returns the secret key (shown once, never stored).
+ * `apps` limits it to those app names; leave it out for every app.
+ */
+export function createInvite(name: string, options: { apps?: string[]; autoName?: boolean } = {}): string {
   const key = newSecret();
   const data = readAccess();
-  data.invites.push({ hash: hashSecret(key), name, createdAt: now() });
+  const invite: AccessInvite = { hash: hashSecret(key), name, createdAt: now() };
+  if (options.autoName) {
+    invite.autoName = true;
+  }
+  if (options.apps) {
+    invite.apps = options.apps;
+  }
+  data.invites.push(invite);
   writeAccess(data);
   return key;
 }
@@ -80,15 +126,27 @@ export function redeemInvite(key: string): { name: string; token: string } | und
   }
   const token = newSecret();
   invite.usedAt = now();
-  data.sessions.push({ hash: hashSecret(token), name: invite.name, createdAt: invite.usedAt });
+  const session: AccessSession = { hash: hashSecret(token), name: invite.name, createdAt: invite.usedAt };
+  if (invite.apps) {
+    session.apps = invite.apps;
+  }
+  data.sessions.push(session);
   writeAccess(data);
   return { name: invite.name, token };
 }
 
-/** The live session for this token, if any. */
-export function findSession(token: string): AccessSession | undefined {
-  const hash = hashSecret(token);
-  return readAccess().sessions.find((s) => s.hash === hash && !s.revokedAt);
+/** The live sessions for these tokens, with the token each one came from. */
+export function findSessions(tokens: string[]): { token: string; session: AccessSession }[] {
+  const sessions = readAccess().sessions;
+  const found: { token: string; session: AccessSession }[] = [];
+  for (const token of tokens) {
+    const hash = hashSecret(token);
+    const session = sessions.find((s) => s.hash === hash && !s.revokedAt);
+    if (session) {
+      found.push({ token, session });
+    }
+  }
+  return found;
 }
 
 /** Revokes every open invite and live session of a person. Returns how many were revoked. */
@@ -120,6 +178,8 @@ export interface PersonRow {
   devices: number;
   openInvites: number;
   firstInvited: string;
+  /** What the newest key with this label opens: app names, or undefined for every app. */
+  apps?: string[];
 }
 
 /** One row per person who was ever invited. */
@@ -132,6 +192,7 @@ export function listPeople(): PersonRow[] {
       row = { name: invite.name, state: "revoked", devices: 0, openInvites: 0, firstInvited: invite.createdAt };
       rows.set(invite.name, row);
     }
+    row.apps = invite.apps;
     if (!invite.usedAt && !invite.revokedAt) {
       row.openInvites++;
     }

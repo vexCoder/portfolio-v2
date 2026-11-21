@@ -44,8 +44,8 @@ async function buildArtifacts() {
     },
   });
 
-  // 2b. Bundle the invite command (runs on the VPS as `node invite.js ...`)
-  console.log("→ Bundling invite command");
+  // 2b. Bundle the key command (runs on the VPS as `node key.js ...`)
+  console.log("→ Bundling key command");
   await build({
     entryPoints: [resolve(server, "src/access/cli.ts")],
     bundle: true,
@@ -53,7 +53,7 @@ async function buildArtifacts() {
     platform: "node",
     target: "node18",
     format: "esm",
-    outfile: resolve(artifacts, "invite.js"),
+    outfile: resolve(artifacts, "key.js"),
   });
 
   // 3. Copy templates

@@ -107,7 +107,12 @@ export interface PortfolioData {
 // Only sha256 hashes of invite keys and session tokens are stored.
 export interface AccessInvite {
   hash: string;
+  /** The label for list/revoke: a name you gave with --name, or a random one. */
   name: string;
+  /** True when the label was made up by the key command, so the page does not greet it. */
+  autoName?: boolean;
+  /** App names this key may open. Missing means every app. */
+  apps?: string[];
   createdAt: string;
   usedAt?: string;
   revokedAt?: string;
@@ -116,6 +121,8 @@ export interface AccessInvite {
 export interface AccessSession {
   hash: string;
   name: string;
+  /** Copied from the invite. Missing means every app. */
+  apps?: string[];
   createdAt: string;
   revokedAt?: string;
 }

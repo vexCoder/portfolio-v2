@@ -12,8 +12,9 @@
     "compile": "tsx scripts/build.ts artifacts",
     "deploy": "pnpm compile && node ./artifacts/server.js",
     "upload": "pnpm compile && tsx scripts/upload.ts",
-    "invite": "tsx scripts/invite.ts",
+    "key": "tsx scripts/key.ts",
     "app:push": "tsx scripts/app.ts push",
+    "app:url": "tsx scripts/app.ts url",
     "app:remove": "tsx scripts/app.ts remove"
   },
   "devDependencies": {
